@@ -1,0 +1,12 @@
+export * from './models/index.js';
+export * from './errors.js';
+export * from './logger.js';
+export { getPool, closePool } from './db/client.js';
+export { ContextObjectRepo } from './db/repositories/context-object.repo.js';
+export { TransactionRepo } from './db/repositories/transaction.repo.js';
+export { ChangeLogRepo } from './db/repositories/change-log.repo.js';
+export { deepMergeContext } from './engine/deep-merge.js';
+export { computeDiff } from './engine/diff.js';
+export { generateSnapshot } from './engine/snapshot.js';
+export { TemplateValidator } from './engine/validator.js';
+export type { ContextTemplate } from './engine/validator.js';

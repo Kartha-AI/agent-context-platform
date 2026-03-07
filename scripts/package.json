@@ -1,0 +1,19 @@
+{
+  "name": "@acp/scripts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "migrate": "tsx src/migrate.ts",
+    "seed": "tsx src/seed.ts",
+    "test-mcp": "tsx src/test-mcp.ts"
+  },
+  "dependencies": {
+    "@acp/core": "workspace:*",
+    "@acp/templates": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  }
+}
