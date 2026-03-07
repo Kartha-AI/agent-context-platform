@@ -4,6 +4,8 @@ A unified, AI-agent-optimized data store for business entity context. Instead of
 
 Your data pipelines extract and map data from source systems into the ACP's canonical model via a REST API. Your AI agents then read enriched entity profiles and record decisions back through an MCP server — no direct database access, no per-source-system integration code in the agent. Deploy the entire platform into your own AWS account with a single `cdk deploy`.
 
+![ACP Overview](acp-overview1.png)
+
 ---
 
 ## Table of Contents
@@ -169,6 +171,58 @@ Connect to the RDS instance (via bastion host or SSM Session Manager) and run th
 ---
 
 ## Architecture
+
+### Architecture diagram
+
+End-to-end view: source systems → pipelines → REST API → Context Engine → Context Store; agents use the MCP Server to read and write context.
+
+![ACP architecture](assets/acp-architecture-diagram.png)
+
+**Mermaid (editable):**
+
+```mermaid
+flowchart TB
+  subgraph sources["Source systems"]
+    SF[Salesforce]
+    SNOW[Snowflake]
+    SQL[SQL DBs]
+  end
+
+  subgraph pipelines["Customer pipelines"]
+    AIR[Airflow]
+    GLUE[Glue]
+    STEP[Step Functions]
+    SCR[Scripts]
+  end
+
+  subgraph write["Write path"]
+    API["REST API (Lambda)"]
+    ENG[Context Engine: validation, merge, diff, change log]
+    API --> ENG
+  end
+
+  subgraph store["Context store (PostgreSQL RDS)"]
+    CO[context_objects]
+    CT[context_transactions]
+    CL[change_log]
+  end
+
+  subgraph read["Read path"]
+    MCP["MCP Server (ECS Fargate)"]
+    MCP --> |"get_entity, search_entities,\nget_transactions,\nget_context_changes"| store
+    MCP <--> |"record_transaction"| store
+  end
+
+  subgraph agents["AI agents"]
+    A[Agents]
+  end
+
+  sources --> |"Extract & map"| pipelines
+  pipelines --> |"Canonical model"| API
+  ENG --> store
+  store --> MCP
+  A --> |"MCP tool calls"| MCP
+```
 
 ### Deployment Model
 
