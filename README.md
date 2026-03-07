@@ -172,7 +172,7 @@ Connect to the RDS instance (via bastion host or SSM Session Manager) and run th
 
 ## Architecture
 
-[View interactive architecture diagram](acp-architecture.html)
+[View interactive architecture diagram](https://htmlpreview.github.io/?https://github.com/Kartha-AI/agent-context-platform/blob/main/acp-architecture.html)
 
 ### Deployment Model
 
