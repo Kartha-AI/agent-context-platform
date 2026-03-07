@@ -1,0 +1,23 @@
+{
+  "name": "@acp/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "dev": "tsx watch src/dev-server.ts"
+  },
+  "dependencies": {
+    "@acp/core": "workspace:*",
+    "@acp/templates": "workspace:*",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.131",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  }
+}
