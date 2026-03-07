@@ -4,6 +4,8 @@ A unified, AI-agent-optimized data store for business entity context. Instead of
 
 Your data pipelines extract and map data from source systems into the ACP's canonical model via a REST API. Your AI agents then read enriched entity profiles and record decisions back through an MCP server — no direct database access, no per-source-system integration code in the agent. Deploy the entire platform into your own AWS account with a single `cdk deploy`.
 
+[View interactive architecture diagram](https://htmlpreview.github.io/?https://github.com/Kartha-AI/agent-context-platform/blob/main/acp-architecture.html)
+
 ![ACP Overview](acp-overview1.png)
 
 ---
