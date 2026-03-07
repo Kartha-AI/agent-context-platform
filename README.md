@@ -172,6 +172,8 @@ Connect to the RDS instance (via bastion host or SSM Session Manager) and run th
 
 ## Architecture
 
+[View interactive architecture diagram](acp-architecture.html)
+
 ### Deployment Model
 
 The ACP deploys into your own AWS account via CDK.
