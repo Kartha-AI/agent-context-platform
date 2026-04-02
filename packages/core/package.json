@@ -6,7 +6,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r src/db/migrations dist/db/",
     "clean": "rm -rf dist",
     "migrate": "tsx src/db/migrate.ts",
     "seed": "tsx src/db/seed.ts"

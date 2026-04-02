@@ -2,7 +2,12 @@
 
 A unified, AI-agent-optimized data store for business entity context. Instead of AI agents querying multiple operational systems (Salesforce, Snowflake, SQL databases) directly via individual MCP servers, the ACP provides a single curated context store that agents read from and write to via MCP tools.
 
-Your data pipelines extract and map data from source systems into the ACP's canonical model via a REST API. Your AI agents then read enriched entity profiles and record decisions back through an MCP server — no direct database access, no per-source-system integration code in the agent. Deploy the entire platform into your own AWS account with a single `cdk deploy`.
+The platform is **schema-agnostic** -- it stores whatever context JSONB it receives, deep merges it, writes change logs, and serves it to agents via MCP. Templates and validation live in the CLI, not the platform.
+
+Three interfaces access the same data:
+- **CLI** (`acp`) -- project setup, data loading, querying via REST API
+- **MCP Server** -- agent-facing tools via MCP protocol
+- **REST API** -- direct HTTP access for pipelines and integrations
 
 [View interactive architecture diagram](https://htmlpreview.github.io/?https://github.com/Kartha-AI/agent-context-platform/blob/main/acp-architecture.html)
 
@@ -13,8 +18,10 @@ Your data pipelines extract and map data from source systems into the ACP's cano
 ## Table of Contents
 
 - [Quick Start](#quick-start)
+- [CLI Reference](#cli-reference)
 - [Build](#build)
 - [Testing](#testing)
+- [Local Development](#local-development)
 - [Deployment](#deployment)
 - [Architecture](#architecture)
 - [Context Object Model](#context-object-model)
@@ -30,61 +37,137 @@ Your data pipelines extract and map data from source systems into the ACP's cano
 
 - **Node.js** 20.x
 - **pnpm** (`npm install -g pnpm`)
-- **Docker** (for local Postgres)
-- **AWS CLI** + **AWS CDK CLI** (for deployment)
+- **Docker** (for local Postgres, API, and MCP server)
+- **AWS CLI** + **AWS CDK CLI** (for AWS deployment only)
 
-### Local Development
+### 1. Build and Start
 
 ```bash
-# Install dependencies
+# Install dependencies and build
 pnpm install
-
-# Build all packages
 pnpm run build
 
-# Start Postgres (pgvector:pg16 on port 5432)
-docker compose up db
+# Start all services (Postgres + API + MCP server)
+docker compose up -d
 
-# Run migrations
-DATABASE_URL=postgresql://acp:localdev@localhost:5432/acp pnpm --filter @acp/scripts run migrate
-
-# Seed sample data (Acme Corp, Globex Industries)
-DATABASE_URL=postgresql://acp:localdev@localhost:5432/acp pnpm --filter @acp/scripts run seed
-
-# Start the REST API on :3000
-DATABASE_URL=postgresql://acp:localdev@localhost:5432/acp PORT=3002 pnpm --filter @acp/api run dev
-
-# Start the MCP server on :3001
-DATABASE_URL=postgresql://acp:localdev@localhost:5432/acp pnpm --filter @acp/mcp-server run dev
+# Verify
+docker compose ps          # all 3 services healthy
+curl http://localhost:3002/v1/health
 ```
 
-### Try it out
+### 2. Install the CLI
 
 ```bash
-# Health check
-curl http://localhost:3002/v1/health
-
-# Upsert an entity
-curl -X POST http://localhost:3002/v1/objects \
-  -H "Authorization: Bearer dev-key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "objectType": "entity",
-    "subtype": "customer",
-    "canonicalName": "Wayne Enterprises",
-    "context": {
-      "attributes": { "name": "Wayne Enterprises", "industry": "Defense", "segment": "enterprise" },
-      "measures": { "arr": 2000000, "healthScore": 91 }
-    },
-    "sourceRefs": [{ "system": "salesforce", "id": "ACC-099" }]
-  }'
-
-# Get an entity by ID
-curl -H "Authorization: Bearer dev-key" http://localhost:3002/v1/objects/<object-id>
-
-# Test MCP tools
-DATABASE_URL=postgresql://acp:localdev@localhost:5432/acp pnpm --filter @acp/scripts run test-mcp
+# One-time setup
+pnpm setup                 # creates global bin dir (if needed)
+source ~/.zshrc            # reload shell
+cd packages/cli && pnpm link --global
 ```
+
+After this, `acp` is available globally from any directory.
+
+### 3. Try the Demo
+
+```bash
+# Create a demo project with sample data
+acp init --demo ~/projects/acp-demo
+cd ~/projects/acp-demo
+
+# Load demo data (20 customers, 40 contacts, 50 invoices, 10 vendors)
+acp connect sync
+
+# Query
+acp ctx list
+acp ctx get customer "Acme Corp"
+acp ctx search --type customer --filter '{"context.measures.health_score":{"lt":50}}'
+acp txn list --types risk_assessed
+acp changes --since 2026-03-01T00:00:00Z
+```
+
+### 4. Create Your Own Project
+
+```bash
+acp init ~/projects/my-ops       # pick context types interactively
+cd ~/projects/my-ops
+cp ~/downloads/customers.csv data/
+acp connect add csv              # generates pipeline YAML with auto-mapping
+acp connect sync                 # validates + loads data
+acp ctx list                     # see what's loaded
+```
+
+---
+
+## CLI Reference
+
+### Project Commands
+
+| Command | Purpose |
+|---------|---------|
+| `acp init <path>` | Create a project, pick context type templates |
+| `acp init --demo <path>` | Create a demo project with sample data |
+| `acp ctx define [type]` | Add a context type (standard or custom) |
+| `acp connect add csv` | Configure a CSV/JSON data source + generate mapping |
+| `acp connect list` | Show configured connectors |
+| `acp connect sync` | Validate and load data into the platform |
+
+### Query Commands
+
+| Command | Purpose |
+|---------|---------|
+| `acp ctx list` | Entity counts by type |
+| `acp ctx get <type> <name\|id>` | Full entity profile with recent transactions |
+| `acp ctx search --type --query --filter --limit` | Search entities |
+| `acp txn list --object-id --types --since --until` | List transactions |
+| `acp txn add --object-id --type --context` | Record a transaction |
+| `acp changes --since --types --limit` | Changefeed (what changed since timestamp) |
+
+### Query Examples
+
+```bash
+# Stats
+acp ctx list
+
+# Get entity by name or UUID
+acp ctx get customer "Acme Corp"
+acp ctx get customer 550e8400-e29b-41d4-a716-446655440000
+
+# Search with JSONB filters
+acp ctx search --type customer --filter '{"context.measures.arr":{"gt":100000}}'
+acp ctx search --type invoice --query "overdue"
+
+# Transactions
+acp txn list --object-id 550e8400-... --types risk_assessed --since 2026-03-01
+acp txn list --types churn_warning
+acp txn add --object-id 550e8400-... --type risk_assessed \
+  --context '{"score":42}' --actors '{"agent":"monitor"}'
+
+# Changefeed
+acp changes --since 2026-03-28T00:00:00Z --types customer --limit 20
+```
+
+### Pipeline YAML Format
+
+Pipeline YAMLs define how source data maps to context objects:
+
+```yaml
+source:
+  type: csv
+  file: data/customers.csv
+target_context: customer
+identity:
+  source_ref_field: id
+  canonical_name_field: company_name
+mapping:
+  attributes:
+    name: company_name
+    industry: industry
+  measures:
+    arr: annual_revenue
+  temporals:
+    customer_since: created_date
+```
+
+Type coercion is automatic: `measures` fields become numbers, `temporals` become ISO dates, everything else stays as strings.
 
 ---
 
@@ -98,7 +181,7 @@ pnpm run build
 pnpm --filter @acp/core run build
 pnpm --filter @acp/api run build
 pnpm --filter @acp/mcp-server run build
-pnpm --filter @acp/templates run build
+pnpm --filter @kartha/acp-cli run build
 pnpm --filter @acp/infra run build
 ```
 
@@ -111,6 +194,73 @@ pnpm run test
 ```
 
 Runs vitest across all packages.
+
+---
+
+## Local Development
+
+### Docker Compose (recommended)
+
+`docker compose up -d` starts all three services:
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| `db` | 5432 | PostgreSQL 16 with pgvector + pg_trgm |
+| `api` | 3002 | REST API (auto-runs migrations on startup) |
+| `mcp` | 3001 | MCP server (Streamable HTTP transport) |
+
+```bash
+docker compose up -d          # start all
+docker compose ps             # check status
+docker compose logs api       # view API logs
+docker compose down           # stop all (data persists in volume)
+docker compose up -d --build  # rebuild after code changes
+```
+
+Data persists in the `acp-data` Docker volume across restarts.
+
+### Manual (without Docker for API/MCP)
+
+If you prefer running API and MCP outside Docker:
+
+```bash
+# Start just Postgres
+docker compose up db -d
+
+# Run migrations
+DATABASE_URL=postgresql://acp:localdev@localhost:5432/acp pnpm --filter @acp/core run migrate
+
+# Start API (dev mode with hot reload)
+DATABASE_URL=postgresql://acp:localdev@localhost:5432/acp PORT=3002 pnpm --filter @acp/api run dev
+
+# Start MCP server (dev mode with hot reload)
+DATABASE_URL=postgresql://acp:localdev@localhost:5432/acp pnpm --filter @acp/mcp-server run dev
+```
+
+### MCP Transport Modes
+
+The MCP server supports two transports:
+
+**Streamable HTTP (default)** -- for remote agents and Claude.ai:
+```json
+{ "mcpServers": { "acp": { "url": "http://localhost:3001/mcp" } } }
+```
+
+**stdio** -- for Claude Desktop local:
+```json
+{
+  "mcpServers": {
+    "acp": {
+      "command": "node",
+      "args": ["<repo>/packages/mcp-server/dist/index.js"],
+      "env": {
+        "ACP_MCP_TRANSPORT": "stdio",
+        "DATABASE_URL": "postgresql://acp:localdev@localhost:5432/acp"
+      }
+    }
+  }
+}
+```
 
 ---
 
@@ -132,9 +282,9 @@ pnpm run deploy
 
 This deploys three stacks:
 
-1. **acp-{env}-data** — VPC, RDS, Secrets Manager
-2. **acp-{env}-api** — API Gateway + Lambda functions
-3. **acp-{env}-mcp** — ECS Fargate + ALB + ECR
+1. **acp-{env}-data** -- VPC, RDS PostgreSQL, Secrets Manager
+2. **acp-{env}-api** -- API Gateway + Lambda functions
+3. **acp-{env}-mcp** -- ECS Fargate + ALB + ECR
 
 ### Push MCP server Docker image
 
@@ -156,10 +306,6 @@ docker push $ECR_URI:latest
 aws ecs update-service --cluster acp-dev-mcp --service <service-name> --force-new-deployment
 ```
 
-### Run migrations on RDS
-
-Connect to the RDS instance (via bastion host or SSM Session Manager) and run the migration SQL from `packages/core/src/db/migrations/001_initial_schema.sql`.
-
 ### Environment-specific configuration
 
 | Setting | Dev | Prod |
@@ -176,76 +322,60 @@ Connect to the RDS instance (via bastion host or SSM Session Manager) and run th
 
 [View interactive architecture diagram](https://htmlpreview.github.io/?https://github.com/Kartha-AI/agent-context-platform/blob/main/acp-architecture.html)
 
+### Design Principles
+
+- **Platform is schema-agnostic.** It stores and serves JSONB context objects without opinion on schema. Templates and validation live in the CLI.
+- **API and MCP both use `@acp/core` directly.** Same repositories, same engine, same DB connection pool. No HTTP hop between them.
+- **CLI is a pure HTTP client.** It talks to the REST API. No `@acp/core` dependency.
+
 ### Deployment Model
 
-The ACP deploys into your own AWS account via CDK.
-
-Two compute targets serve different access patterns:
-
-- **REST API on Lambda** — Data pipelines are bursty (run every 15 min, hourly, daily). Lambda scales to zero between runs. Pay per request.
-- **MCP Server on ECS Fargate** — MCP expects a persistent server process. Agents call tools frequently and need fast, consistent response times without cold starts. Fargate runs a long-lived Node.js process with a warm DB connection pool.
-
 ```
-AWS
-┌──────────────────────────────────────────────────────────────┐
-│                                                              │
-│  WRITE PATH (bursty, pipeline-driven)                        │
-│  ┌──────────────────────────────────────┐                    │
-│  │  API Gateway HTTP API + Lambda        │                   │
-│  │  POST /v1/objects                     │                   │
-│  │  POST /v1/objects/bulk                │                   │
-│  │  POST /v1/objects/:id/txns            │                   │
-│  │  GET  /v1/objects/:id                 │                   │
-│  │  GET  /v1/objects/changes             │                   │
-│  │  GET  /v1/health                      │                   │
-│  └──────────────────┬───────────────────┘                    │
-│                      │                                       │
-│  READ PATH (persistent, agent-facing)                        │
-│  ┌──────────────────────────────────────┐                    │
-│  │  ECS Fargate Service (MCP Server)     │                   │
-│  │  ALB → Fargate task (always warm)     │                   │
-│  │                                       │                   │
-│  │  MCP Tools:                           │                   │
-│  │  ├── get_entity                       │                   │
-│  │  ├── search_entities                  │                   │
-│  │  ├── get_transactions                 │                   │
-│  │  ├── get_context_changes              │                   │
-│  │  └── record_transaction               │                   │
-│  └──────────────────┬───────────────────┘                    │
-│                      │                                       │
-│         Both paths share:                                    │
-│  ┌──────────────────▼───────────────────────────────────┐    │
-│  │  Context Engine (@acp/core)                           │    │
-│  │  - Schema validation against templates                │    │
-│  │  - JSONB deep merge on upsert                         │    │
-│  │  - Change detection (diff previous vs new)            │    │
-│  │  - Change log management                              │    │
-│  └──────────────────┬───────────────────────────────────┘    │
-│                      ▼                                       │
-│  ┌─────────────────────────────────────────────────────┐     │
-│  │  PostgreSQL RDS (with pgvector + pg_trgm extensions) │     │
-│  │  ├── context_objects        (entity profiles)        │     │
-│  │  ├── context_transactions   (activity history)       │     │
-│  │  └── change_log             (powers changefeed)      │     │
-│  └─────────────────────────────────────────────────────┘     │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
+                         ┌─────────────────────────────────┐
+                         │  @acp/core (shared library)      │
+                         │  models, repositories, engine    │
+                         │  deep-merge, diff, snapshot      │
+                         │  pg.Pool connection              │
+                         └──────────┬──────────────────────┘
+                                    │
+                         ┌──────────▼──────────┐
+                         │  Postgres :5432      │
+                         │  context_objects     │
+                         │  context_transactions│
+                         │  change_log          │
+                         └──────────▲──────────┘
+                                    │
+                    ┌───────────────┼───────────────┐
+                    │                               │
+          ┌─────────┴──────────┐         ┌─────────┴──────────┐
+          │  REST API :3002    │         │  MCP Server :3001   │
+          │  uses @acp/core    │         │  uses @acp/core     │
+          │  direct DB access  │         │  direct DB access   │
+          └─────────▲──────────┘         └─────────▲──────────┘
+                    │                               │
+                    │ HTTP                          │ MCP protocol
+                    │                               │
+          ┌─────────┴──────────┐         ┌─────────┴──────────┐
+          │  CLI               │         │  Claude Desktop     │
+          │  acp connect sync  │         │  Cursor, agents     │
+          │  acp ctx get       │         │  any MCP client     │
+          │  acp txn list      │         │                     │
+          │  (HTTP client only)│         │                     │
+          └────────────────────┘         └────────────────────┘
 ```
 
 ### Data Flow
 
-**Write Path 1 — Pipelines write entity context via REST API:**
+**Write Path 1 -- Pipelines write entity context via CLI or REST API:**
 
 ```
-Source systems (Salesforce, Snowflake, SQL)
-  → your pipeline code (Airflow, Glue, Step Functions, scripts)
-  → Maps source fields to canonical model shape
-  → POST /v1/objects (upsert entity)
-  → POST /v1/objects/:id/txns (record events)
-  → Platform validates, upserts, diffs, writes change_log
+Source data (CSV, JSON, databases)
+  → acp connect sync (CLI validates against templates, maps fields)
+  → POST /v1/objects/bulk (REST API)
+  → Platform deep merges, diffs, writes change_log
 ```
 
-**Write Path 2 — Agents write back decisions via MCP:**
+**Write Path 2 -- Agents write back decisions via MCP:**
 
 ```
 Agent reasons about an entity
@@ -254,16 +384,15 @@ Agent reasons about an entity
   → Other agents discover this on next poll
 ```
 
-**Read Path 1 — On-demand agent pulls context:**
+**Read Path 1 -- On-demand agent pulls context:**
 
 ```
 User: "What's happening with Acme Corp?"
   → Agent calls MCP tool: get_entity({ name: "Acme Corp" })
   → Returns full context object with recent transactions
-  → Agent reasons and responds
 ```
 
-**Read Path 2 — Polling agent checks for changes:**
+**Read Path 2 -- Polling agent checks for changes:**
 
 ```
 Every 5 minutes, agent wakes up
@@ -271,22 +400,6 @@ Every 5 minutes, agent wakes up
   → Returns changes with context snapshots
   → Agent evaluates, acts, writes back via record_transaction
 ```
-
-**Read Path 3 — Search agent finds entities:**
-
-```
-Agent needs relevant entities
-  → MCP tool: search_entities({ type: "customer", filters: {...} })
-  → Returns matching entities via JSONB filters or trigram text search
-```
-
-### CDK Infrastructure Stacks
-
-| Stack | Resources |
-|-------|-----------|
-| **DataStack** | VPC (public + private + isolated subnets), RDS PostgreSQL 16 (pgvector, pg_trgm), Secrets Manager (DB creds + API keys) |
-| **ApiStack** | 6 Lambda functions (Node.js 20, ARM64), HTTP API Gateway with all routes, Security Groups |
-| **McpStack** | ECS Fargate cluster, ECR repository, ALB, auto-scaling (1-4 tasks, 70% CPU target), CloudWatch logs |
 
 ---
 
@@ -302,43 +415,48 @@ The context JSONB organizes facts by dimension:
 
 ```json
 {
-  "attributes": {},   // WHAT  — core identity facts
-  "measures": {},     // HOW MUCH — quantitative data, KPIs, financials
-  "actors": {},       // WHO — people, roles, ownership
-  "temporals": {},    // WHEN — dates, milestones, deadlines
-  "locations": {},    // WHERE — geography, channels, territories
-  "intents": {},      // WHY — reasons, strategy, risk factors
-  "processes": {}     // HOW — workflow state, current stage, methods
+  "attributes": {},   // WHAT  -- core identity facts
+  "measures": {},     // HOW MUCH -- quantitative data, KPIs, financials
+  "actors": {},       // WHO -- people, roles, ownership
+  "temporals": {},    // WHEN -- dates, milestones, deadlines
+  "locations": {},    // WHERE -- geography, channels, territories
+  "intents": {},      // WHY -- reasons, strategy, risk factors
+  "processes": {}     // HOW -- workflow state, current stage, methods
 }
 ```
 
-This grouping provides:
-1. **Pipeline discipline** — forces curation across all dimensions, exposing gaps
-2. **Agent prompt efficiency** — agents selectively attend to relevant dimensions
-3. **Consistent structure** — every entity type follows the same shape
+### Standard Templates
 
-### Pre-Built Templates
+10 templates ship with the CLI in `packages/cli/standard-templates/`:
 
-| Template | Type | Transaction Types |
-|----------|------|-------------------|
-| `crm-customer` | entity/customer | case_opened, case_closed, qbr_completed, risk_assessed, renewal_initiated, expansion_identified, escalation_created, nps_received, contract_renewed, contract_amended, churn_warning, health_score_updated |
-| `crm-contact` | entity/contact | meeting_held, email_sent, email_received, call_completed, sentiment_assessed, role_changed |
-| `crm-opportunity` | entity/opportunity | stage_changed, amount_updated, meeting_scheduled, proposal_sent, contract_sent, deal_won, deal_lost, competitor_identified, risk_flagged |
-| `crm-case` | entity/case | case_created, status_changed, assigned, escalated, comment_added, resolved, reopened, csat_received, sla_breached |
+| Template | Type | Category |
+|----------|------|----------|
+| `crm-customer` | entity/customer | CRM |
+| `crm-contact` | entity/contact | CRM |
+| `crm-opportunity` | entity/opportunity | CRM |
+| `crm-case` | entity/case | CRM |
+| `crm-vendor` | entity/vendor | CRM |
+| `finance-invoice` | entity/invoice | Finance |
+| `legal-contract` | entity/contract | Legal |
+| `logistics-shipment` | entity/shipment | Logistics |
+| `catalog-product` | entity/product | Catalog |
+| `hr-employee` | entity/employee | HR |
+
+Templates are YAML files that define fields, types, enums, and allowed transaction types. `acp init` copies selected templates into your project's `contexts/` directory where they can be customized.
 
 ### Database Schema
 
 Three tables back the platform:
 
-- **context_objects** — Entity profiles with JSONB context, trigram name index, GIN JSONB index, pgvector embedding column, composite unique index on source reference
-- **context_transactions** — Activity history linked to entities, indexed by object + time and by type + time
-- **change_log** — Powers the changefeed polling pattern, indexed by changed_at for cursor-based pagination
+- **context_objects** -- Entity profiles with JSONB context, trigram name index, GIN JSONB index, pgvector embedding column, composite unique index on source reference
+- **context_transactions** -- Activity history linked to entities, indexed by object + time and by type + time
+- **change_log** -- Powers the changefeed polling pattern, indexed by changed_at for cursor-based pagination
 
 ---
 
 ## MCP Tools
 
-The MCP server exposes 5 tools over Streamable HTTP transport:
+The MCP server exposes 5 tools. Supports both Streamable HTTP and stdio transports.
 
 | Tool | Purpose | Key Parameters |
 |------|---------|----------------|
@@ -356,16 +474,35 @@ The MCP server exposes 5 tools over Streamable HTTP transport:
 |--------|------|---------|
 | `POST` | `/v1/objects` | Upsert a single context object |
 | `POST` | `/v1/objects/bulk` | Upsert multiple context objects (max 100) |
+| `GET` | `/v1/objects/stats` | Entity counts grouped by type |
+| `GET` | `/v1/objects/search` | Search by type, text, JSONB filters |
 | `GET` | `/v1/objects/:id` | Get a context object by ID (includes last 10 transactions) |
+| `GET` | `/v1/objects/:id/txns` | Get transactions for an entity |
 | `POST` | `/v1/objects/:id/txns` | Record a transaction for an entity |
-| `GET` | `/v1/objects/changes` | Changefeed — what changed since timestamp |
+| `GET` | `/v1/objects/txns` | Query transactions across all entities |
+| `GET` | `/v1/objects/changes` | Changefeed -- what changed since timestamp |
 | `GET` | `/v1/health` | Health check |
 
-Authentication: `Authorization: Bearer <api-key>` header.
+Authentication: `Authorization: Bearer <api-key>` header. All endpoints except `/v1/health`.
+
+### Search Parameters
+
+`GET /v1/objects/search`:
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `type` | string | Filter by subtype (e.g., `customer`) |
+| `query` | string | Text search on canonical_name |
+| `filters` | JSON string | JSONB path filters (e.g., `{"context.measures.arr":{"gt":100000}}`) |
+| `limit` | number | Max results (default 10, max 100) |
+| `offset` | number | Pagination offset |
+
+Supported filter operators: `eq`, `gt`, `gte`, `lt`, `lte`, `contains`
 
 ### Upsert Behavior
 
-- Deep merges new context into existing context (preserves keys not in the update)
+- Schema-agnostic: accepts any JSONB context structure
+- Deep merges new context into existing (preserves keys not in the update)
 - Arrays are replaced, not appended
 - `null` values delete fields
 - Computes a diff of what changed
@@ -376,27 +513,44 @@ Authentication: `Authorization: Bearer <api-key>` header.
 ## Project Structure
 
 ```
-agent-context-platform/
+acp/
 ├── packages/
 │   ├── core/                       # Shared types, DB client, engine
 │   │   └── src/
 │   │       ├── models/             # ContextObject, ContextTransaction, ChangeEntry, SourceReference
 │   │       ├── db/
 │   │       │   ├── client.ts       # pg.Pool singleton
+│   │       │   ├── migrate.ts      # runMigrations() + standalone runner
 │   │       │   ├── migrations/     # SQL schema
 │   │       │   └── repositories/   # context-object.repo, transaction.repo, change-log.repo
 │   │       └── engine/             # deep-merge, diff, snapshot, validator
-│   ├── api/                        # REST API (Lambda handlers)
+│   ├── api/                        # REST API
 │   │   └── src/
-│   │       ├── handlers/           # upsert-object, bulk-upsert, get-object, record-transaction, get-changes, health
-│   │       └── middleware/         # auth, error-handler, request-logger
-│   └── mcp-server/                 # MCP Server (ECS Fargate)
-│       └── src/
-│           └── tools/              # get-entity, search-entities, get-transactions, get-context-changes, record-transaction
-├── templates/                      # Canonical model templates (customer, contact, opportunity, case)
+│   │       ├── handlers/           # upsert-object, bulk-upsert, get-object, get-stats,
+│   │       │                       # search-objects, record-transaction, get-changes,
+│   │       │                       # get-entity-transactions, get-transactions-query, health
+│   │       ├── middleware/         # auth, error-handler, request-logger
+│   │       ├── local-server.ts    # HTTP server for Docker (auto-migrates on startup)
+│   │       └── dev-server.ts      # Dev server with hot reload
+│   ├── mcp-server/                 # MCP Server (HTTP + stdio transports)
+│   │   └── src/
+│   │       ├── tools/              # get-entity, search-entities, get-transactions,
+│   │       │                       # get-context-changes, record-transaction
+│   │       ├── server.ts           # MCP tool registration
+│   │       └── index.ts            # Transport selection (HTTP or stdio)
+│   └── cli/                        # CLI (`acp` command)
+│       ├── src/
+│       │   ├── commands/           # init, ctx-*, txn-*, changes, connect-*
+│       │   ├── util/               # config, api-client, template-loader, validator, format
+│       │   ├── connectors/         # CSV/JSON/JSONL extractor
+│       │   ├── pipelines/          # YAML parser, mapper, auto-mapper
+│       │   └── demo/              # Demo CSVs + pipeline YAMLs
+│       └── standard-templates/    # 10 YAML templates (CRM, finance, legal, logistics, catalog, HR)
+├── templates/                      # Legacy TypeScript templates (reference only)
 ├── infra/                          # AWS CDK (DataStack, ApiStack, McpStack)
 ├── scripts/                        # migrate, seed, test-mcp
-├── docker-compose.yml              # Local Postgres (pgvector:pg16)
+├── docker-compose.yml              # Postgres + API + MCP server
+├── Dockerfile.api                  # API container image
 └── Dockerfile.mcp                  # MCP server container image
 ```
 
@@ -409,9 +563,10 @@ agent-context-platform/
 | Monorepo | pnpm workspaces |
 | Database | PostgreSQL 16 + pgvector + pg_trgm |
 | DB Client | pg (no ORM) |
-| Validation | ajv (templates) + zod (API requests) |
+| Validation | zod (API requests, CLI config) |
 | Logging | pino (structured JSON) |
 | MCP SDK | @modelcontextprotocol/sdk |
+| CLI | commander + inquirer + chalk |
 | API | Raw Lambda handlers (no Express) |
 | IaC | AWS CDK (TypeScript) |
 | Testing | vitest |

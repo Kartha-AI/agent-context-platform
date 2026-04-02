@@ -1,0 +1,43 @@
+template_id: hr-employee
+type: entity
+subtype: employee
+version: "1.0"
+description: "Employee for workforce, performance, and HR context"
+
+schema:
+  attributes:
+    employee_id: { type: string, required: true, description: "Employee ID" }
+    name: { type: string, required: true, description: "Full name" }
+    email: { type: string, description: "Email" }
+    title: { type: string, description: "Title" }
+    department: { type: string, description: "Department" }
+    status: { type: string, enum: [active, on_leave, terminated, contractor], description: "Status" }
+  measures:
+    salary: { type: number, description: "Salary" }
+    utilization_pct: { type: number, description: "Utilization %" }
+    performance_score: { type: number, description: "Performance 0-100" }
+    tenure_months: { type: number, description: "Tenure months" }
+  actors:
+    manager: { type: string, description: "Manager" }
+    hr_partner: { type: string, description: "HR partner" }
+    mentor: { type: string, description: "Mentor" }
+  temporals:
+    hire_date: { type: date, description: "Hire date" }
+    last_review_date: { type: date, description: "Last review" }
+    next_review_date: { type: date, description: "Next review" }
+    termination_date: { type: date, description: "Termination" }
+  locations:
+    office: { type: string, description: "Office" }
+    city: { type: string, description: "City" }
+    country: { type: string, description: "Country" }
+    timezone: { type: string, description: "Timezone" }
+  intents:
+    career_goals: { type: string, description: "Career goals" }
+    flight_risk: { type: string, enum: [low, medium, high], description: "Flight risk" }
+    development_areas: { type: string, description: "Development areas" }
+  processes:
+    onboarding_status: { type: string, enum: [not_started, in_progress, completed], description: "Onboarding" }
+    review_cycle_stage: { type: string, enum: [not_started, self_review, manager_review, calibration, delivered], description: "Review cycle" }
+    pto_balance_days: { type: number, description: "PTO days" }
+
+transaction_types: [hired, promoted, reviewed, role_changed, team_changed, leave_started, leave_ended, terminated, goal_set, training_completed]

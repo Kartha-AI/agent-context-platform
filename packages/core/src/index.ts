@@ -2,6 +2,7 @@ export * from './models/index.js';
 export * from './errors.js';
 export * from './logger.js';
 export { getPool, closePool } from './db/client.js';
+export { runMigrations } from './db/migrate.js';
 export { ContextObjectRepo } from './db/repositories/context-object.repo.js';
 export { TransactionRepo } from './db/repositories/transaction.repo.js';
 export { ChangeLogRepo } from './db/repositories/change-log.repo.js';

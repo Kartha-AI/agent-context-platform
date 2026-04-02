@@ -1,0 +1,35 @@
+source:
+  type: csv
+  file: data/invoices.csv
+target_context: invoice
+identity:
+  source_ref_field: id
+  canonical_name_field: invoice_number
+mapping:
+  attributes:
+    invoice_number: invoice_number
+    vendor_name: vendor_name
+    customer_name: customer_name
+    description: description
+    status: status
+  measures:
+    amount: amount
+    tax: tax
+    total: total
+    amount_paid: amount_paid
+    amount_due: amount_due
+  actors:
+    issued_by: issued_by
+    approved_by: approved_by
+  temporals:
+    issued_date: issued_date
+    due_date: due_date
+    paid_date: paid_date
+  locations:
+    billing_address_country: billing_address_country
+  intents:
+    payment_priority: payment_priority
+  processes:
+    approval_status: approval_status
+    payment_method: payment_method
+    collection_stage: collection_stage

@@ -1,0 +1,31 @@
+{
+  "name": "@kartha/acp-cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "acp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "standard-templates"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "csv-parse": "^5.5.0",
+    "inquirer": "^9.2.0",
+    "yaml": "^2.4.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  }
+}

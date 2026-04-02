@@ -4,3 +4,7 @@ export { handler as getObjectHandler } from './handlers/get-object.js';
 export { handler as recordTransactionHandler } from './handlers/record-transaction.js';
 export { handler as getChangesHandler } from './handlers/get-changes.js';
 export { handler as healthHandler } from './handlers/health.js';
+export { handler as getStatsHandler } from './handlers/get-stats.js';
+export { handler as searchObjectsHandler } from './handlers/search-objects.js';
+export { handler as getTransactionsQueryHandler } from './handlers/get-transactions-query.js';
+export { handler as getEntityTransactionsHandler } from './handlers/get-entity-transactions.js';

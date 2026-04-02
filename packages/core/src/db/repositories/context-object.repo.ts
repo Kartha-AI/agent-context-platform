@@ -64,11 +64,19 @@ export class ContextObjectRepo {
     return result.rows.map(rowToContextObject);
   }
 
+  async getStats(): Promise<{ subtype: string; count: number }[]> {
+    const result = await this.pool.query(
+      `SELECT subtype, COUNT(*)::int AS count FROM context_objects GROUP BY subtype ORDER BY subtype`,
+    );
+    return result.rows.map((row) => ({ subtype: row.subtype as string, count: row.count as number }));
+  }
+
   async search(params: {
     type?: string;
     filters?: Record<string, Record<string, unknown>>;
     query?: string;
     limit?: number;
+    offset?: number;
   }): Promise<ContextObject[]> {
     const conditions: string[] = [];
     const values: unknown[] = [];
@@ -124,10 +132,17 @@ export class ContextObjectRepo {
 
     const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
     const limit = params.limit ?? 10;
+
+    let offsetClause = '';
+    if (params.offset && params.offset > 0) {
+      values.push(params.offset);
+      offsetClause = ` OFFSET $${paramIdx++}`;
+    }
+
     values.push(limit);
 
     const result = await this.pool.query(
-      `SELECT * FROM context_objects ${where} ORDER BY updated_at DESC LIMIT $${paramIdx}`,
+      `SELECT * FROM context_objects ${where} ORDER BY updated_at DESC${offsetClause} LIMIT $${paramIdx}`,
       values,
     );
     return result.rows.map(rowToContextObject);

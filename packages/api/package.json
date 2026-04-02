@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@acp/core": "workspace:*",
-    "@acp/templates": "workspace:*",
     "zod": "^3.22.0"
   },
   "devDependencies": {
