@@ -1,0 +1,41 @@
+template_id: finance-invoice
+type: entity
+subtype: invoice
+version: "1.0"
+description: "Invoice for billing, payments, and collections"
+
+schema:
+  attributes:
+    invoice_number: { type: string, required: true, description: "Invoice number" }
+    vendor_name: { type: string, description: "Vendor name" }
+    customer_name: { type: string, description: "Customer name" }
+    description: { type: string, description: "Description" }
+    status: { type: string, enum: [draft, sent, paid, overdue, void, disputed], description: "Status" }
+  measures:
+    amount: { type: number, description: "Subtotal" }
+    tax: { type: number, description: "Tax" }
+    total: { type: number, description: "Total" }
+    amount_paid: { type: number, description: "Paid" }
+    amount_due: { type: number, description: "Due" }
+    line_item_count: { type: number, description: "Line items" }
+  actors:
+    issued_by: { type: string, description: "Issued by" }
+    approved_by: { type: string, description: "Approved by" }
+    paid_by: { type: string, description: "Paid by" }
+  temporals:
+    issued_date: { type: date, description: "Issued date" }
+    due_date: { type: date, description: "Due date" }
+    paid_date: { type: date, description: "Paid date" }
+    created_at: { type: date, description: "Created" }
+  locations:
+    billing_address_country: { type: string, description: "Billing country" }
+    billing_address_region: { type: string, description: "Billing region" }
+  intents:
+    payment_priority: { type: string, enum: [normal, high, urgent], description: "Priority" }
+    dispute_reason: { type: string, description: "Dispute reason" }
+  processes:
+    approval_status: { type: string, enum: [pending, approved, rejected], description: "Approval status" }
+    payment_method: { type: string, description: "Payment method" }
+    collection_stage: { type: string, enum: [current, reminder_sent, escalated, collections, written_off], description: "Collection stage" }
+
+transaction_types: [created, sent, payment_received, partially_paid, overdue_flagged, disputed, voided, reminder_sent]

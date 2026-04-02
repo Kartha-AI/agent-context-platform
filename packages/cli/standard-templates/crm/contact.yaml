@@ -1,0 +1,35 @@
+template_id: crm-contact
+type: entity
+subtype: contact
+version: "1.0"
+description: "Contact or person with role, engagement, and sentiment context"
+
+schema:
+  attributes:
+    name: { type: string, required: true, description: "Full name" }
+    email: { type: string, description: "Email address" }
+    phone: { type: string, description: "Phone number" }
+    title: { type: string, description: "Job title" }
+    company: { type: string, description: "Company name" }
+    role: { type: string, enum: [champion, decision_maker, influencer, end_user, blocker], description: "Role in buying/usage" }
+    status: { type: string, enum: [active, inactive, churned], description: "Contact status" }
+  measures:
+    engagement_score: { type: number, description: "Engagement score 0-100" }
+    email_open_rate: { type: number, description: "Email open rate percentage" }
+    meetings_last_90d: { type: number, description: "Meetings in last 90 days" }
+  actors:
+    account_owner: { type: string, description: "Account owner for this contact's company" }
+    introduced_by: { type: string, description: "Who introduced this contact" }
+  temporals:
+    first_contact: { type: date, description: "Date of first contact" }
+    last_contacted: { type: date, description: "Last outreach" }
+    last_responded: { type: date, description: "Last response" }
+  locations:
+    city: { type: string, description: "City" }
+    country: { type: string, description: "Country" }
+    timezone: { type: string, description: "Timezone" }
+  intents:
+    sentiment: { type: string, enum: [positive, neutral, negative, unknown], description: "Current sentiment" }
+    interests: { type: string, description: "Known interests" }
+
+transaction_types: [meeting_held, email_sent, email_received, call_completed, sentiment_assessed, role_changed]

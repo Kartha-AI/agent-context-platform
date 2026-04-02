@@ -1,0 +1,40 @@
+template_id: logistics-shipment
+type: entity
+subtype: shipment
+version: "1.0"
+description: "Shipment for tracking deliveries and logistics"
+
+schema:
+  attributes:
+    tracking_number: { type: string, required: true, description: "Tracking number" }
+    carrier: { type: string, description: "Carrier" }
+    service_level: { type: string, description: "Service level" }
+    status: { type: string, enum: [pending, picked_up, in_transit, out_for_delivery, delivered, returned, lost], description: "Status" }
+  measures:
+    weight_kg: { type: number, description: "Weight kg" }
+    package_count: { type: number, description: "Packages" }
+    declared_value: { type: number, description: "Declared value" }
+    shipping_cost: { type: number, description: "Cost" }
+  actors:
+    shipper: { type: string, description: "Sender" }
+    receiver: { type: string, description: "Recipient" }
+    carrier_contact: { type: string, description: "Carrier contact" }
+  temporals:
+    ship_date: { type: date, description: "Ship date" }
+    estimated_delivery: { type: date, description: "ETA" }
+    actual_delivery: { type: date, description: "Delivered" }
+    last_scan: { type: date, description: "Last scan" }
+  locations:
+    origin_city: { type: string, description: "Origin city" }
+    origin_country: { type: string, description: "Origin country" }
+    destination_city: { type: string, description: "Destination city" }
+    destination_country: { type: string, description: "Destination country" }
+    current_location: { type: string, description: "Current location" }
+  intents:
+    priority: { type: string, enum: [standard, high, critical], description: "Priority" }
+    delivery_instructions: { type: string, description: "Instructions" }
+  processes:
+    customs_status: { type: string, enum: [not_applicable, pending, cleared, held], description: "Customs" }
+    delivery_attempt_count: { type: number, description: "Attempts" }
+
+transaction_types: [label_created, picked_up, in_transit, out_for_delivery, delivered, delivery_failed, returned, exception_flagged]

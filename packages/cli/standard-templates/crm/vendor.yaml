@@ -1,0 +1,42 @@
+template_id: crm-vendor
+type: entity
+subtype: vendor
+version: "1.0"
+description: "Vendor or supplier with performance, spend, and compliance context"
+
+schema:
+  attributes:
+    name: { type: string, required: true, description: "Vendor company name" }
+    category: { type: string, description: "Vendor category" }
+    tax_id: { type: string, description: "Tax ID" }
+    website: { type: string, description: "Website" }
+    status: { type: string, enum: [active, inactive, suspended, pending_approval], description: "Status" }
+  measures:
+    annual_spend: { type: number, description: "Annual spend" }
+    on_time_delivery_rate: { type: number, description: "On-time delivery %" }
+    defect_rate: { type: number, description: "Defect rate %" }
+    open_pos: { type: number, description: "Open purchase orders" }
+    avg_lead_time_days: { type: number, description: "Average lead time days" }
+  actors:
+    account_manager: { type: string, description: "Internal account manager" }
+    primary_contact_name: { type: string, description: "Vendor contact name" }
+    primary_contact_email: { type: string, description: "Vendor contact email" }
+  temporals:
+    contract_start: { type: date, description: "Contract start" }
+    contract_end: { type: date, description: "Contract end" }
+    last_review_date: { type: date, description: "Last review" }
+    onboarded_at: { type: date, description: "Onboarded date" }
+  locations:
+    headquarters: { type: string, description: "HQ location" }
+    country: { type: string, description: "Country" }
+    region: { type: string, description: "Region" }
+  intents:
+    strategic_importance: { type: string, enum: [critical, important, standard, replaceable], description: "Strategic importance" }
+    risk_level: { type: string, enum: [low, medium, high], description: "Risk level" }
+    diversification_notes: { type: string, description: "Diversification notes" }
+  processes:
+    approval_status: { type: string, enum: [approved, conditional, under_review, blocked], description: "Approval status" }
+    payment_terms: { type: string, description: "Payment terms" }
+    compliance_status: { type: string, enum: [compliant, non_compliant, review_needed], description: "Compliance status" }
+
+transaction_types: [invoice_received, payment_sent, performance_reviewed, contract_renewed, issue_reported, risk_assessed, onboarded]

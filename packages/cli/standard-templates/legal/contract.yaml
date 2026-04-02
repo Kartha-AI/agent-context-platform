@@ -1,0 +1,41 @@
+template_id: legal-contract
+type: entity
+subtype: contract
+version: "1.0"
+description: "Contract for agreements, terms, and renewals"
+
+schema:
+  attributes:
+    contract_number: { type: string, required: true, description: "Contract number" }
+    title: { type: string, description: "Title" }
+    counterparty: { type: string, description: "Counterparty" }
+    contract_type: { type: string, enum: [service, license, nda, employment, lease, partnership], description: "Type" }
+    status: { type: string, enum: [draft, active, expired, terminated, suspended], description: "Status" }
+  measures:
+    total_value: { type: number, description: "Total value" }
+    annual_value: { type: number, description: "Annual value" }
+    remaining_value: { type: number, description: "Remaining value" }
+  actors:
+    owner: { type: string, description: "Owner" }
+    signer: { type: string, description: "Signer" }
+    counterparty_contact: { type: string, description: "Their contact" }
+    legal_reviewer: { type: string, description: "Legal reviewer" }
+  temporals:
+    effective_date: { type: date, description: "Effective date" }
+    expiration_date: { type: date, description: "Expiration" }
+    signed_date: { type: date, description: "Signed" }
+    last_amended: { type: date, description: "Last amended" }
+    next_review_date: { type: date, description: "Next review" }
+  locations:
+    governing_law_jurisdiction: { type: string, description: "Governing law" }
+    counterparty_country: { type: string, description: "Counterparty country" }
+  intents:
+    renewal_intent: { type: string, enum: [renew, renegotiate, terminate, undecided], description: "Renewal intent" }
+    termination_risk: { type: string, enum: [low, medium, high], description: "Termination risk" }
+    negotiation_notes: { type: string, description: "Negotiation notes" }
+  processes:
+    approval_stage: { type: string, enum: [drafting, legal_review, signature, executed], description: "Approval stage" }
+    renewal_status: { type: string, enum: [not_due, upcoming, in_progress, completed], description: "Renewal status" }
+    amendment_count: { type: number, description: "Amendments" }
+
+transaction_types: [drafted, signed, amended, renewed, terminated, reviewed, escalated, expiry_warning]

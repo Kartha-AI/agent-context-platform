@@ -1,0 +1,38 @@
+source:
+  type: csv
+  file: data/vendors.csv
+target_context: vendor
+identity:
+  source_ref_field: id
+  canonical_name_field: name
+mapping:
+  attributes:
+    name: name
+    category: category
+    website: website
+    status: status
+  measures:
+    annual_spend: annual_spend
+    on_time_delivery_rate: on_time_delivery_rate
+    defect_rate: defect_rate
+    open_pos: open_pos
+    avg_lead_time_days: avg_lead_time_days
+  actors:
+    account_manager: account_manager
+    primary_contact_name: primary_contact_name
+    primary_contact_email: primary_contact_email
+  temporals:
+    contract_start: contract_start
+    contract_end: contract_end
+    last_review_date: last_review_date
+  locations:
+    headquarters: headquarters
+    country: country
+    region: region
+  intents:
+    strategic_importance: strategic_importance
+    risk_level: risk_level
+  processes:
+    approval_status: approval_status
+    payment_terms: payment_terms
+    compliance_status: compliance_status

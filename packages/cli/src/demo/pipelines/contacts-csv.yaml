@@ -1,0 +1,30 @@
+source:
+  type: csv
+  file: data/contacts.csv
+target_context: contact
+identity:
+  source_ref_field: id
+  canonical_name_field: name
+mapping:
+  attributes:
+    name: name
+    email: email
+    phone: phone
+    title: title
+    company: company
+    role: role
+    status: status
+  measures:
+    engagement_score: engagement_score
+    meetings_last_90d: meetings_last_90d
+  actors:
+    account_owner: account_owner
+  temporals:
+    first_contact: first_contact
+    last_contacted: last_contacted
+  locations:
+    city: city
+    country: country
+    timezone: timezone
+  intents:
+    sentiment: sentiment

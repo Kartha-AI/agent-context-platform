@@ -38,11 +38,14 @@ bower_components
 build/Release
 
 CLAUDE.md
+Claude-*.md
 .claude
 
 # Dependency directories
 node_modules/
 jspm_packages/
+
+.DS_Store
 
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/

@@ -3,10 +3,7 @@ import {
   TransactionRepo,
   ChangeLogRepo,
   generateSnapshot,
-  NotFoundError,
-  ValidationError,
 } from '@acp/core';
-import { getTemplateValidator } from '@acp/templates';
 
 export const recordTransactionTool = {
   name: 'record_transaction',
@@ -34,13 +31,6 @@ export async function handleRecordTransaction(args: Record<string, unknown>): Pr
   const changeLogRepo = new ChangeLogRepo();
 
   const entity = await objectRepo.findById(args.objectId as string);
-
-  const validator = getTemplateValidator();
-  if (!validator.validateTransactionType(entity.objectType, entity.subtype, args.transactionType as string)) {
-    throw new ValidationError(
-      `Invalid transaction type '${args.transactionType}' for ${entity.objectType}/${entity.subtype}`,
-    );
-  }
 
   const transactionId = await txnRepo.insert(
     args.objectId as string,

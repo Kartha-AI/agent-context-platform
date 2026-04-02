@@ -3,13 +3,11 @@ import { z } from 'zod';
 import {
   ContextObjectRepo,
   ChangeLogRepo,
-  ValidationError,
   deepMergeContext,
   computeDiff,
   generateSnapshot,
   logger,
 } from '@acp/core';
-import { getTemplateValidator } from '@acp/templates';
 import { validateAuth } from '../middleware/auth.js';
 import { handleError } from '../middleware/error-handler.js';
 
@@ -44,7 +42,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
     const objectRepo = new ContextObjectRepo();
     const changeLogRepo = new ChangeLogRepo();
-    const validator = getTemplateValidator();
 
     const results: { objectId: string; status: 'created' | 'updated' }[] = [];
     const errors: { index: number; error: string }[] = [];
@@ -52,12 +49,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     for (let i = 0; i < parsed.objects.length; i++) {
       const obj = parsed.objects[i];
       try {
-        const validation = validator.validate(obj.objectType, obj.subtype, obj.context);
-        if (!validation.valid) {
-          errors.push({ index: i, error: `Validation failed: ${validation.errors?.join(', ')}` });
-          continue;
-        }
-
         const sourceRef = obj.sourceRefs[0];
         const existing = await objectRepo.findBySourceKey(
           obj.objectType,

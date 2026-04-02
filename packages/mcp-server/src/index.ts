@@ -1,11 +1,33 @@
 import { createServer } from 'http';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { logger, getPool } from '@acp/core';
 import { createMcpServer } from './server.js';
 
 const PORT = parseInt(process.env.PORT ?? '3001', 10);
+const TRANSPORT = process.env.ACP_MCP_TRANSPORT ?? 'http';
 
-async function main(): Promise<void> {
+async function startStdio(): Promise<void> {
+  const pool = getPool();
+  await pool.query('SELECT 1');
+  logger.info('Database connection verified (stdio mode)');
+
+  const server = createMcpServer();
+  const transport = new StdioServerTransport();
+  await server.connect(transport);
+  logger.info('MCP server started (stdio transport)');
+
+  const shutdown = async (): Promise<void> => {
+    await transport.close().catch(() => {});
+    await pool.end();
+    process.exit(0);
+  };
+
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
+}
+
+async function startHttp(): Promise<void> {
   const pool = getPool();
   await pool.query('SELECT 1');
   logger.info('Database connection verified');
@@ -55,7 +77,7 @@ async function main(): Promise<void> {
   });
 
   httpServer.listen(PORT, () => {
-    logger.info({ port: PORT }, 'MCP server started');
+    logger.info({ port: PORT }, 'MCP server started (HTTP transport)');
   });
 
   const shutdown = async (): Promise<void> => {
@@ -71,6 +93,8 @@ async function main(): Promise<void> {
   process.on('SIGTERM', shutdown);
   process.on('SIGINT', shutdown);
 }
+
+const main = TRANSPORT === 'stdio' ? startStdio : startHttp;
 
 main().catch((err) => {
   logger.error({ err }, 'Failed to start MCP server');

@@ -1,0 +1,51 @@
+id,invoice_number,vendor_name,customer_name,description,status,amount,tax,total,amount_paid,amount_due,issued_by,approved_by,issued_date,due_date,paid_date,billing_address_country,payment_priority,approval_status,payment_method,collection_stage
+INV001,INV-2026-001,NA,Acme Corp,Q1 Platform License,paid,120000,9600,129600,129600,0,Finance Team,Sarah Chen,2026-01-05,2026-02-05,2026-01-28,US,normal,approved,wire,current
+INV002,INV-2026-002,NA,Acme Corp,Q1 Support Premium,paid,15000,1200,16200,16200,0,Finance Team,Sarah Chen,2026-01-05,2026-02-05,2026-01-30,US,normal,approved,wire,current
+INV003,INV-2026-003,NA,Globex Industries,Q1 Subscription,paid,30000,2400,32400,32400,0,Finance Team,David Park,2026-01-10,2026-02-10,2026-02-08,US,normal,approved,ach,current
+INV004,INV-2026-004,NA,Northwind Trading,Q1 Enterprise License,overdue,187500,15000,202500,0,202500,Finance Team,Sarah Chen,2026-01-15,2026-02-15,NA,US,high,approved,wire,escalated
+INV005,INV-2026-005,NA,Contoso Ltd,Q1 Platform + Support,paid,230000,18400,248400,248400,0,Finance Team,Maria Garcia,2026-01-08,2026-02-08,2026-01-25,US,normal,approved,wire,current
+INV006,INV-2026-006,NA,Fabrikam Inc,Q1 Subscription,paid,50000,4000,54000,54000,0,Finance Team,David Park,2026-01-12,2026-02-12,2026-02-10,US,normal,approved,ach,current
+INV007,INV-2026-007,NA,Initech Corp,Q1 Starter Plan,sent,11250,900,12150,0,12150,Finance Team,Chris Lee,2026-03-01,2026-04-01,NA,US,normal,approved,credit_card,current
+INV008,INV-2026-008,NA,Umbrella Corp,Q1 Enterprise,paid,300000,24000,324000,324000,0,Finance Team,Maria Garcia,2026-01-05,2026-02-05,2026-01-20,CH,normal,approved,wire,current
+INV009,INV-2026-009,NA,Stark Industries,Q1 Enterprise,paid,500000,40000,540000,540000,0,Finance Team,Sarah Chen,2026-01-03,2026-02-03,2026-01-15,US,normal,approved,wire,current
+INV010,INV-2026-010,NA,Wayne Enterprises,Q1 Enterprise,paid,375000,30000,405000,405000,0,Finance Team,Maria Garcia,2026-01-05,2026-02-05,2026-01-22,US,normal,approved,wire,current
+INV011,INV-2026-011,NA,Oscorp,Q1 Standard,overdue,45000,3600,48600,0,48600,Finance Team,Chris Lee,2026-01-20,2026-02-20,NA,US,urgent,approved,ach,collections
+INV012,INV-2026-012,NA,Cyberdyne Systems,Q1 Premium,paid,62500,5000,67500,67500,0,Finance Team,Sarah Chen,2026-01-15,2026-02-15,2026-02-12,US,normal,approved,ach,current
+INV013,INV-2026-013,NA,Weyland Corp,Q1 Enterprise,paid,750000,60000,810000,810000,0,Finance Team,Maria Garcia,2026-01-05,2026-02-05,2026-01-18,UK,normal,approved,wire,current
+INV014,INV-2026-014,NA,Tyrell Corp,Q1 Standard,sent,75000,6000,81000,0,81000,Finance Team,Chris Lee,2026-03-01,2026-04-01,NA,US,normal,approved,ach,current
+INV015,INV-2026-015,NA,Soylent Corp,Q1 Starter,paid,15000,1200,16200,16200,0,Finance Team,David Park,2026-02-01,2026-03-01,2026-02-25,US,normal,approved,credit_card,current
+INV016,INV-2026-016,NA,Aperture Science,Q1 Premium,overdue,87500,7000,94500,0,94500,Finance Team,Sarah Chen,2026-01-15,2026-02-15,NA,US,high,approved,wire,reminder_sent
+INV017,INV-2026-017,NA,Massive Dynamic,Q1 Enterprise,paid,450000,36000,486000,486000,0,Finance Team,Maria Garcia,2026-01-05,2026-02-05,2026-01-19,US,normal,approved,wire,current
+INV018,INV-2026-018,NA,Hooli,Q1 Premium,paid,100000,8000,108000,108000,0,Finance Team,David Park,2026-01-10,2026-02-10,2026-02-05,US,normal,approved,wire,current
+INV019,INV-2026-019,NA,Pied Piper,Q1 Starter,sent,8750,700,9450,0,9450,Finance Team,Chris Lee,2026-03-01,2026-04-01,NA,US,normal,approved,credit_card,current
+INV020,INV-2026-020,NA,Dunder Mifflin,Q1 Standard,paid,21250,1700,22950,22950,0,Finance Team,David Park,2026-01-15,2026-02-15,2026-02-14,US,normal,approved,ach,current
+INV021,INV-2026-021,CloudHost Inc,NA,AWS Infrastructure Q1,paid,45000,3600,48600,48600,0,CloudHost Billing,Finance Team,2026-01-01,2026-01-31,2026-01-28,US,normal,approved,wire,current
+INV022,INV-2026-022,DataPipe Analytics,NA,Analytics Platform License,paid,24000,1920,25920,25920,0,DataPipe Billing,Finance Team,2026-01-05,2026-02-05,2026-02-01,US,normal,approved,ach,current
+INV023,INV-2026-023,SecureNet Solutions,NA,Security Audit Q1,paid,35000,2800,37800,37800,0,SecureNet Billing,Finance Team,2026-02-01,2026-03-01,2026-02-28,US,normal,approved,wire,current
+INV024,INV-2026-024,TalentForce HR,NA,HR Platform Annual,paid,18000,1440,19440,19440,0,TalentForce Billing,Finance Team,2026-01-01,2026-01-31,2026-01-25,US,normal,approved,ach,current
+INV025,INV-2026-025,CloudHost Inc,NA,AWS Infrastructure Feb,paid,48000,3840,51840,51840,0,CloudHost Billing,Finance Team,2026-02-01,2026-02-28,2026-02-25,US,normal,approved,wire,current
+INV026,INV-2026-026,NA,Acme Corp,Q2 Platform License,sent,120000,9600,129600,0,129600,Finance Team,Sarah Chen,2026-04-01,2026-05-01,NA,US,normal,approved,wire,current
+INV027,INV-2026-027,NA,Contoso Ltd,Q2 Platform + Support,sent,230000,18400,248400,0,248400,Finance Team,Maria Garcia,2026-04-01,2026-05-01,NA,US,normal,approved,wire,current
+INV028,INV-2026-028,LogiShip Partners,NA,Shipping Services Q1,paid,12000,960,12960,12960,0,LogiShip Billing,Finance Team,2026-01-15,2026-02-15,2026-02-10,US,normal,approved,ach,current
+INV029,INV-2026-029,NA,Umbrella Corp,Q2 Enterprise,sent,300000,24000,324000,0,324000,Finance Team,Maria Garcia,2026-04-01,2026-05-01,NA,CH,normal,approved,wire,current
+INV030,INV-2026-030,CloudHost Inc,NA,AWS Infrastructure Mar,sent,52000,4160,56160,0,56160,Finance Team,Finance Team,2026-03-01,2026-03-31,NA,US,normal,pending,wire,current
+INV031,INV-2026-031,NA,Northwind Trading,Late Payment Fee,disputed,5000,400,5400,0,5400,Finance Team,Sarah Chen,2026-03-15,2026-04-15,NA,US,high,approved,wire,escalated
+INV032,INV-2026-032,NA,Oscorp,Late Payment Fee,sent,2500,200,2700,0,2700,Finance Team,Chris Lee,2026-03-15,2026-04-15,NA,US,urgent,approved,ach,collections
+INV033,INV-2026-033,SecureNet Solutions,NA,Penetration Test,sent,15000,1200,16200,0,16200,SecureNet Billing,Finance Team,2026-03-15,2026-04-15,NA,US,normal,approved,wire,current
+INV034,INV-2026-034,NA,Stark Industries,Q2 Enterprise,sent,500000,40000,540000,0,540000,Finance Team,Sarah Chen,2026-04-01,2026-05-01,NA,US,normal,approved,wire,current
+INV035,INV-2026-035,NA,Wayne Enterprises,Q2 Enterprise,sent,375000,30000,405000,0,405000,Finance Team,Maria Garcia,2026-04-01,2026-05-01,NA,US,normal,approved,wire,current
+INV036,INV-2026-036,NA,Massive Dynamic,Q2 Enterprise,sent,450000,36000,486000,0,486000,Finance Team,Maria Garcia,2026-04-01,2026-05-01,NA,US,normal,approved,wire,current
+INV037,INV-2026-037,NA,Weyland Corp,Q2 Enterprise,sent,750000,60000,810000,0,810000,Finance Team,Maria Garcia,2026-04-01,2026-05-01,NA,UK,normal,approved,wire,current
+INV038,INV-2026-038,TalentForce HR,NA,HR Platform Monthly Mar,paid,1500,120,1620,1620,0,TalentForce Billing,Finance Team,2026-03-01,2026-03-31,2026-03-28,US,normal,approved,ach,current
+INV039,INV-2026-039,DataPipe Analytics,NA,Analytics Overage Feb,sent,3500,280,3780,0,3780,DataPipe Billing,Finance Team,2026-03-05,2026-04-05,NA,US,normal,approved,ach,current
+INV040,INV-2026-040,NA,Globex Industries,Q2 Subscription,sent,30000,2400,32400,0,32400,Finance Team,David Park,2026-04-01,2026-05-01,NA,US,normal,approved,ach,current
+INV041,INV-2026-041,NA,Fabrikam Inc,Q2 Subscription,sent,50000,4000,54000,0,54000,Finance Team,David Park,2026-04-01,2026-05-01,NA,US,normal,approved,ach,current
+INV042,INV-2026-042,NA,Cyberdyne Systems,Q2 Premium,sent,62500,5000,67500,0,67500,Finance Team,Sarah Chen,2026-04-01,2026-05-01,NA,US,normal,approved,ach,current
+INV043,INV-2026-043,NA,Hooli,Q2 Premium,sent,100000,8000,108000,0,108000,Finance Team,David Park,2026-04-01,2026-05-01,NA,US,normal,approved,wire,current
+INV044,INV-2026-044,NA,Dunder Mifflin,Q2 Standard,sent,21250,1700,22950,0,22950,Finance Team,David Park,2026-04-01,2026-05-01,NA,US,normal,approved,ach,current
+INV045,INV-2026-045,LogiShip Partners,NA,Shipping Services Q2,sent,14000,1120,15120,0,15120,LogiShip Billing,Finance Team,2026-04-01,2026-05-01,NA,US,normal,approved,ach,current
+INV046,INV-2026-046,NA,Aperture Science,Q2 Premium,sent,87500,7000,94500,0,94500,Finance Team,Sarah Chen,2026-04-01,2026-05-01,NA,US,high,approved,wire,current
+INV047,INV-2026-047,NA,Tyrell Corp,Q2 Standard,sent,75000,6000,81000,0,81000,Finance Team,Chris Lee,2026-04-01,2026-05-01,NA,US,normal,approved,ach,current
+INV048,INV-2026-048,NA,Soylent Corp,Q2 Starter,sent,15000,1200,16200,0,16200,Finance Team,David Park,2026-04-01,2026-05-01,NA,US,normal,approved,credit_card,current
+INV049,INV-2026-049,NA,Pied Piper,Q2 Starter,sent,8750,700,9450,0,9450,Finance Team,Chris Lee,2026-04-01,2026-05-01,NA,US,normal,approved,credit_card,current
+INV050,INV-2026-050,NA,Initech Corp,Q2 Starter,sent,11250,900,12150,0,12150,Finance Team,Chris Lee,2026-04-01,2026-05-01,NA,US,normal,approved,credit_card,current

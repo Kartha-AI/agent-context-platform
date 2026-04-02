@@ -1,0 +1,41 @@
+template_id: catalog-product
+type: entity
+subtype: product
+version: "1.0"
+description: "Product for catalog, inventory, and pricing"
+
+schema:
+  attributes:
+    sku: { type: string, required: true, description: "SKU" }
+    name: { type: string, required: true, description: "Product name" }
+    category: { type: string, description: "Category" }
+    brand: { type: string, description: "Brand" }
+    description: { type: string, description: "Description" }
+    status: { type: string, enum: [active, discontinued, draft, out_of_stock], description: "Status" }
+  measures:
+    price: { type: number, description: "Price" }
+    cost: { type: number, description: "Cost" }
+    margin_pct: { type: number, description: "Margin %" }
+    stock_quantity: { type: number, description: "Stock" }
+    reorder_point: { type: number, description: "Reorder point" }
+    units_sold_30d: { type: number, description: "Sold last 30d" }
+    units_sold_90d: { type: number, description: "Sold last 90d" }
+  actors:
+    product_manager: { type: string, description: "PM" }
+    supplier: { type: string, description: "Supplier" }
+  temporals:
+    launched_at: { type: date, description: "Launch date" }
+    last_restocked: { type: date, description: "Last restock" }
+    discontinued_at: { type: date, description: "Discontinued" }
+    next_review: { type: date, description: "Next review" }
+  locations:
+    warehouse: { type: string, description: "Warehouse" }
+    available_regions: { type: string, description: "Regions" }
+  intents:
+    pricing_strategy: { type: string, description: "Pricing notes" }
+    lifecycle_stage_notes: { type: string, description: "Lifecycle notes" }
+  processes:
+    availability_status: { type: string, enum: [in_stock, low_stock, out_of_stock, pre_order, backorder], description: "Availability" }
+    fulfillment_method: { type: string, enum: [warehouse, dropship, digital, made_to_order], description: "Fulfillment" }
+
+transaction_types: [price_changed, restocked, sold, returned, discontinued, reviewed, promotion_started, promotion_ended]

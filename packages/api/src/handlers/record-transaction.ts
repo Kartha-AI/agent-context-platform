@@ -5,10 +5,8 @@ import {
   TransactionRepo,
   ChangeLogRepo,
   NotFoundError,
-  ValidationError,
   generateSnapshot,
 } from '@acp/core';
-import { getTemplateValidator } from '@acp/templates';
 import { validateAuth } from '../middleware/auth.js';
 import { handleError } from '../middleware/error-handler.js';
 import { createRequestLogger } from '../middleware/request-logger.js';
@@ -40,13 +38,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
     const objectRepo = new ContextObjectRepo();
     const entity = await objectRepo.findById(objectId);
-
-    const validator = getTemplateValidator();
-    if (!validator.validateTransactionType(entity.objectType, entity.subtype, parsed.transactionType)) {
-      throw new ValidationError(
-        `Invalid transaction type '${parsed.transactionType}' for ${entity.objectType}/${entity.subtype}`,
-      );
-    }
 
     const txnRepo = new TransactionRepo();
     const transactionId = await txnRepo.insert(objectId, parsed);

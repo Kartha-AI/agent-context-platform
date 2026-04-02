@@ -1,0 +1,48 @@
+template_id: crm-customer
+type: entity
+subtype: customer
+version: "1.0"
+description: "Customer or account entity with sales, support, and financial context"
+
+schema:
+  attributes:
+    name: { type: string, required: true, description: "Company or account name" }
+    industry: { type: string, description: "Industry vertical" }
+    segment: { type: string, enum: [enterprise, mid-market, smb, startup], description: "Customer segment" }
+    website: { type: string, description: "Company website URL" }
+    status: { type: string, enum: [active, churned, prospect, suspended], description: "Account status" }
+    flags: { type: array, items: string, description: "Tags or flags" }
+  measures:
+    arr: { type: number, description: "Annual recurring revenue" }
+    mrr: { type: number, description: "Monthly recurring revenue" }
+    health_score: { type: number, description: "Health score 0-100" }
+    nps: { type: number, description: "Net promoter score" }
+    lifetime_value: { type: number, description: "Customer lifetime value" }
+    open_cases: { type: number, description: "Open support cases" }
+    employee_count: { type: number, description: "Company employee count" }
+  actors:
+    owner: { type: string, description: "Account owner / CSM" }
+    executive_sponsor: { type: string, description: "Executive sponsor" }
+    primary_contact: { type: string, description: "Primary contact name" }
+    primary_contact_email: { type: string, description: "Primary contact email" }
+  temporals:
+    customer_since: { type: date, description: "When they became a customer" }
+    renewal_date: { type: date, description: "Next renewal date" }
+    last_qbr: { type: date, description: "Last quarterly business review" }
+    last_activity: { type: date, description: "Last interaction" }
+    contract_end: { type: date, description: "Contract end date" }
+  locations:
+    headquarters: { type: string, description: "HQ city and state/country" }
+    region: { type: string, description: "Sales region" }
+    country: { type: string, description: "Country" }
+    timezone: { type: string, description: "Primary timezone" }
+  intents:
+    expansion_potential: { type: string, description: "Expansion opportunity notes" }
+    churn_risk: { type: string, enum: [low, medium, high, critical], description: "Churn risk level" }
+    strategic_notes: { type: string, description: "Strategic account notes" }
+  processes:
+    onboarding_status: { type: string, enum: [not_started, in_progress, completed], description: "Onboarding status" }
+    contract_type: { type: string, description: "Contract type" }
+    support_tier: { type: string, enum: [basic, standard, premium, enterprise], description: "Support tier" }
+
+transaction_types: [case_opened, case_closed, qbr_completed, risk_assessed, renewal_initiated, expansion_identified, escalation_created, nps_received, contract_renewed, contract_amended, churn_warning, health_score_updated]

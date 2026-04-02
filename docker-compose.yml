@@ -8,9 +8,29 @@ services:
       POSTGRES_USER: acp
       POSTGRES_PASSWORD: localdev
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - acp-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U acp -d acp"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
-  mcp-server:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "3002:3002"
+    environment:
+      DATABASE_URL: postgresql://acp:localdev@db:5432/acp
+      PORT: "3002"
+      API_KEY: dev-key
+      LOG_LEVEL: debug
+    depends_on:
+      db:
+        condition: service_healthy
+
+  mcp:
     build:
       context: .
       dockerfile: Dockerfile.mcp
@@ -19,8 +39,10 @@ services:
     environment:
       DATABASE_URL: postgresql://acp:localdev@db:5432/acp
       PORT: "3001"
+      LOG_LEVEL: debug
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 volumes:
-  pgdata:
+  acp-data:

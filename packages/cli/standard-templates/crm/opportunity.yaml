@@ -1,0 +1,35 @@
+template_id: crm-opportunity
+type: entity
+subtype: opportunity
+version: "1.0"
+description: "Sales deal with stage, value, and probability context"
+
+schema:
+  attributes:
+    name: { type: string, required: true, description: "Opportunity name" }
+    account: { type: string, description: "Associated account" }
+    type: { type: string, enum: [new_business, expansion, renewal, upsell], description: "Opportunity type" }
+    status: { type: string, enum: [open, won, lost, abandoned], description: "Status" }
+  measures:
+    amount: { type: number, description: "Deal amount" }
+    probability: { type: number, description: "Win probability percentage" }
+    weighted_amount: { type: number, description: "Amount x probability" }
+    arr_impact: { type: number, description: "ARR impact if won" }
+  actors:
+    owner: { type: string, description: "Deal owner" }
+    champion: { type: string, description: "Customer champion" }
+    decision_maker: { type: string, description: "Decision maker" }
+  temporals:
+    created_date: { type: date, description: "Created date" }
+    close_date: { type: date, description: "Expected close date" }
+    last_activity: { type: date, description: "Last activity" }
+    stage_changed: { type: date, description: "Stage last changed" }
+  intents:
+    competitors: { type: string, description: "Known competitors" }
+    risk_factors: { type: string, description: "Risk factors" }
+    next_steps: { type: string, description: "Next steps" }
+  processes:
+    stage: { type: string, enum: [prospecting, qualification, proposal, negotiation, closed_won, closed_lost], description: "Pipeline stage" }
+    forecast_category: { type: string, enum: [pipeline, best_case, commit, closed], description: "Forecast category" }
+
+transaction_types: [stage_changed, amount_updated, meeting_scheduled, proposal_sent, contract_sent, deal_won, deal_lost, competitor_identified, risk_flagged]

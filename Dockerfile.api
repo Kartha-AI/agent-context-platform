@@ -1,0 +1,10 @@
+FROM node:20-alpine
+WORKDIR /app
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
+COPY packages/core ./packages/core
+COPY packages/api ./packages/api
+RUN npm install -g pnpm && pnpm install --frozen-lockfile
+RUN pnpm --filter @acp/core run build && pnpm --filter @acp/api run build
+EXPOSE 3002
+HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://localhost:3002/v1/health || exit 1
+CMD ["node", "packages/api/dist/local-server.js"]

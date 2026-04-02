@@ -1,0 +1,36 @@
+template_id: crm-case
+type: entity
+subtype: case
+version: "1.0"
+description: "Support ticket with status, priority, and resolution context"
+
+schema:
+  attributes:
+    case_number: { type: string, required: true, description: "Case number" }
+    subject: { type: string, description: "Subject line" }
+    account: { type: string, description: "Associated account" }
+    category: { type: string, description: "Category" }
+    priority: { type: string, enum: [low, medium, high, critical], description: "Priority" }
+    status: { type: string, enum: [new, open, pending, escalated, resolved, closed], description: "Status" }
+  measures:
+    resolution_time_hours: { type: number, description: "Resolution time in hours" }
+    response_time_hours: { type: number, description: "First response time in hours" }
+    csat: { type: number, description: "CSAT score" }
+    reopen_count: { type: number, description: "Times reopened" }
+  actors:
+    reporter: { type: string, description: "Reporter" }
+    assignee: { type: string, description: "Assignee" }
+    escalated_to: { type: string, description: "Escalated to" }
+  temporals:
+    created_at: { type: date, description: "Created" }
+    first_response_at: { type: date, description: "First response" }
+    resolved_at: { type: date, description: "Resolved" }
+    sla_deadline: { type: date, description: "SLA deadline" }
+  intents:
+    root_cause: { type: string, description: "Root cause" }
+    customer_impact: { type: string, enum: [minimal, moderate, significant, critical], description: "Customer impact" }
+  processes:
+    sla_status: { type: string, enum: [within_sla, at_risk, breached], description: "SLA status" }
+    escalation_level: { type: number, description: "Escalation level 0-3" }
+
+transaction_types: [case_created, status_changed, assigned, escalated, comment_added, resolved, reopened, csat_received, sla_breached]

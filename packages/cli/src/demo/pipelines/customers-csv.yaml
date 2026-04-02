@@ -1,0 +1,39 @@
+source:
+  type: csv
+  file: data/customers.csv
+target_context: customer
+identity:
+  source_ref_field: id
+  canonical_name_field: company_name
+mapping:
+  attributes:
+    name: company_name
+    industry: industry
+    segment: segment
+    status: status
+    website: website
+  measures:
+    arr: arr
+    mrr: mrr
+    health_score: health_score
+    nps: nps
+    open_cases: open_cases
+    employee_count: employee_count
+  actors:
+    owner: owner
+    executive_sponsor: executive_sponsor
+    primary_contact: primary_contact
+    primary_contact_email: primary_contact_email
+  temporals:
+    customer_since: customer_since
+    renewal_date: renewal_date
+    last_qbr: last_qbr
+  locations:
+    headquarters: headquarters
+    region: region
+    country: country
+  intents:
+    churn_risk: churn_risk
+  processes:
+    onboarding_status: onboarding_status
+    support_tier: support_tier
