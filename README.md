@@ -1,13 +1,22 @@
 # Agent Context Platform (ACP)
 
-A unified, AI-agent-optimized data store for business entity context. Instead of AI agents querying multiple operational systems (Salesforce, Snowflake, SQL databases) directly via individual MCP servers, the ACP provides a single curated context store that agents read from and write to via MCP tools.
+**Give your AI agents a unified view of your business data.**
 
-The platform is **schema-agnostic** -- it stores whatever context JSONB it receives, deep merges it, writes change logs, and serves it to agents via MCP. Templates and validation live in the CLI, not the platform.
+Instead of wiring up individual MCP servers to Salesforce, HubSpot, Stripe, and every other system — extract your data once, curate it into a canonical schema, and serve it through a single MCP server. Any agent framework connects to ACP and gets everything it needs in one call.
 
-Three interfaces access the same data:
-- **CLI** (`acp`) -- project setup, data loading, querying via REST API
-- **MCP Server** -- agent-facing tools via MCP protocol
-- **REST API** -- direct HTTP access for pipelines and integrations
+```
+Your data (CRM, billing, support, ERP)
+  → ACP curates into 7-dimension context profiles
+  → Agents query via MCP: "What's happening with Acme Corp?"
+  → One call returns everything, organized by dimension:
+      measures:  ARR $480K, health score 34, NPS 28
+      temporals: renewal in 45 days, last QBR 3 months ago
+      actors:    owner Sarah Chen, contact Jane Lee
+      intents:   churn risk HIGH, expansion potential LOW
+      processes: onboarding complete, support tier premium
+```
+
+ACP is open source, runs locally via Docker Compose, and deploys to AWS/GCP for team use.
 
 [View interactive architecture diagram](https://htmlpreview.github.io/?https://github.com/Kartha-AI/agent-context-platform/blob/main/acp-architecture.html)
 
@@ -15,19 +24,161 @@ Three interfaces access the same data:
 
 ---
 
-## Table of Contents
+## Why ACP?
 
-- [Quick Start](#quick-start)
-- [CLI Reference](#cli-reference)
-- [Build](#build)
-- [Testing](#testing)
-- [Local Development](#local-development)
-- [Deployment](#deployment)
-- [Architecture](#architecture)
-- [Context Object Model](#context-object-model)
-- [MCP Tools](#mcp-tools)
-- [REST API](#rest-api)
-- [Project Structure](#project-structure)
+Every AI agent framework — CrewAI, LangGraph, AutoGen, Mastra, Claude, GPT — has the same unsolved problem: **where does the agent get good business context?**
+
+| Current approach | Problem |
+|-----------------|---------|
+| Individual MCP servers per system | Fragmented context, no cross-system reasoning |
+| Vector databases | Unstructured dumps, no canonical schema |
+| Raw API calls from agents | Inconsistent, slow, no pre-joined context |
+| CDPs (Segment, RudderStack) | Customer-only, marketing-focused |
+
+ACP solves this the way Snowflake solved analytics: extract → curate → serve. Except instead of SQL for analysts, ACP serves MCP tools for agents.
+
+**What makes ACP different:** every entity is organized into 7 semantic dimensions (what, how much, who, when, where, why, how). Agents don't get a flat bag of fields — they get structured context they can navigate. An agent assessing risk knows to check `measures` for health scores and `temporals` for upcoming deadlines. See [Context Object Model](#context-object-model) for details.
+
+---
+
+## ACP vs the Alternatives
+
+### Without ACP: One MCP server per system
+
+```
+Claude Desktop connects to:
+  → hubspot-mcp-server    (deals, companies)
+  → stripe-mcp-server     (payments, subscriptions)
+  → zendesk-mcp-server    (tickets, satisfaction)
+
+User: "Is Acme Corp at risk?"
+
+Agent makes 3 separate tool calls, gets 3 different data shapes,
+then tries to correlate by company name (fuzzy, unreliable).
+No unified health score. No single view. Burns tokens on JOINs.
+```
+
+### Without ACP: Vector database
+
+```
+All documents embedded into Pinecone/Weaviate.
+
+User: "Which customers have ARR over $200K and are at risk?"
+
+Agent gets 10 text chunks: "Acme renewed in 2024..." "ticket #4521 escalated..."
+Can't filter by ARR > $200K — it's embedded text, not a queryable number.
+No current state. No structured fields. No changefeed.
+```
+
+### With ACP: One call, everything joined
+
+```
+User: "Is Acme Corp at risk?"
+
+Agent calls: get_entity({ name: "Acme Corp" })
+
+Returns ONE pre-joined profile:
+  measures:  { arr: 480000, health_score: 34, nps: 28, open_cases: 3 }
+  temporals: { renewal_date: "2026-05-15", last_qbr: "2026-01-10" }
+  actors:    { owner: "Sarah Chen", primary_contact: "Jane Lee" }
+  intents:   { churn_risk: "high", expansion_potential: "low" }
+
+Data from HubSpot + Stripe + Zendesk, already joined by the pipeline.
+Agent reasons on structured, typed, reliable data. One call. No guesswork.
+```
+
+### Cross-entity reasoning
+
+This is where ACP shines. All entity types are in the same store, with the same dimensional structure:
+
+```
+"Which customers with ARR > $200K have overdue invoices AND open support cases?"
+
+Without ACP: agent queries 3 systems, fuzzy-matches company names, correlates
+             in its reasoning (error-prone, slow, token-expensive).
+
+With ACP: all entities share the same namespace.
+  1. search_entities({ type: "customer", filters: { "measures.arr": { "gt": 200000 } } })
+  2. search_entities({ type: "invoice", filters: { "attributes.status": { "eq": "overdue" } } })
+  3. Cross-reference by customer name — consistent format, reliable match.
+
+Or pre-join in the pipeline: customer profile includes overdue_invoice_count.
+Agent makes ONE call.
+```
+
+---
+
+## What Standardization Gives You
+
+### Agent portability
+
+An agent built on ACP works with any data source. Switch from HubSpot to Salesforce? Change the pipeline YAML. The agent code doesn't change — it still reads `measures.arr` and `intents.churn_risk`. Without ACP, switching CRMs means rewriting every agent integration.
+
+### Template reuse
+
+Company A builds a customer risk assessment agent on ACP. Company B uses the same agent — same context type, same dimensions. The only difference is the pipeline YAML that maps their CRM fields to the canonical schema. The agent is portable across organizations.
+
+### Proactive agents via changefeed
+
+Without ACP, agents only respond when asked. With ACP, agents poll `get_context_changes` on a schedule and act on changes autonomously. Health score drops from 87 to 34 → agent auto-creates a risk assessment. Invoice overdue for 30 days → agent sends an alert. This requires a unified change tracking layer that individual MCP servers don't provide.
+
+### Agent-to-agent coordination
+
+Multiple agents read and write to the same context store. They coordinate through data, not direct messaging:
+
+```
+Agent A: monitors customer health → writes risk_assessed transaction
+Agent B: polls changefeed → sees risk_assessed → creates escalation
+Agent C: polls changefeed → sees escalation → notifies account owner
+```
+
+Each agent is independent. They don't know about each other. They coordinate by writing and reading context — the same pattern that makes microservices work with event-driven architecture.
+
+### Cross-org context sharing (future)
+
+The long-term play: Company A (vendor) shares context with Company B (customer). Both run ACP. Company A's agent can see its vendor profile enriched with Company B's customer context. Cross-organization reasoning without point-to-point API integrations. This is the network effect — the same moat that data sharing built for Snowflake.
+
+---
+
+## How It Works
+
+**The platform** runs as Docker containers (Postgres + REST API + MCP server). It's schema-agnostic — it stores any JSONB context, deep merges it, tracks changes, and serves it to agents.
+
+**Your project** is a separate directory with your context type definitions, field mappings, and data files. The CLI reads your project files, validates your data, and loads it into the running platform.
+
+**Three interfaces** access the same data:
+
+```
+Developer's project                    Running ACP Platform
+┌────────────────────────┐            ┌───────────────────────────┐
+│  contexts/*.yaml       │            │  Docker Compose           │
+│  pipelines/*.yaml      │            │  ├── Postgres  :5432      │
+│  data/*.csv            │  HTTP POST │  ├── REST API  :3002      │
+│  acp.yaml              │            │  └── MCP Server :3001     │
+│                        │            │                           │
+│  CLI: validate + map ──┼────────────┼──→ /v1/objects            │
+└────────────────────────┘            └──────────────┬────────────┘
+                                                     │
+                                          AI Agents connect
+                                          via MCP :3001
+```
+
+**Two ways to use it** — ad-hoc questions and structured skills:
+
+```
+Ad-hoc (just ask):                       Skills (structured workflows):
+
+"What's happening with Acme Corp?"       "Run the customer health monitor"
+  → Agent calls get_entity                → Agent follows a defined workflow
+  → Reads the response                    → Polls changefeed for changes
+  → Reasons and answers                   → Assesses each customer against rules
+  → Nothing recorded                      → Records risk_assessed transactions
+                                          → Other agents can act on those results
+No setup needed. No skill required.
+Connect an agent and ask.                Repeatable. Consistent. Builds history.
+```
+
+Both work with the same MCP tools and the same data. Skills are optional — they add structure for recurring business processes, but you get full value from day one just by asking questions.
 
 ---
 
@@ -37,36 +188,35 @@ Three interfaces access the same data:
 
 - **Node.js** 20.x
 - **pnpm** (`npm install -g pnpm`)
-- **Docker** (for local Postgres, API, and MCP server)
-- **AWS CLI** + **AWS CDK CLI** (for AWS deployment only)
+- **Docker** (for Postgres, API, and MCP server)
 
-### 1. Build and Start
+### 1. Start the Platform
 
 ```bash
-# Install dependencies and build
+git clone https://github.com/Kartha-AI/agent-context-platform
+cd agent-context-platform
+
 pnpm install
 pnpm run build
 
-# Start all services (Postgres + API + MCP server)
 docker compose up -d
 
-# Verify
-docker compose ps          # all 3 services healthy
+# Verify — all 3 services should be healthy
+docker compose ps
 curl http://localhost:3002/v1/health
 ```
 
 ### 2. Install the CLI
 
 ```bash
-# One-time setup
 pnpm setup                 # creates global bin dir (if needed)
 source ~/.zshrc            # reload shell
 cd packages/cli && pnpm link --global
 ```
 
-After this, `acp` is available globally from any directory.
+`acp` is now available globally from any directory.
 
-### 3. Try the Demo
+### 3. Try the Demo (2 minutes)
 
 ```bash
 # Create a demo project with sample data
@@ -76,24 +226,216 @@ cd ~/projects/acp-demo
 # Load demo data (20 customers, 40 contacts, 50 invoices, 10 vendors)
 acp connect sync
 
-# Query
+# Query your data
 acp ctx list
-acp ctx get customer "Acme Corp"
+acp ctx get customer "Meridian Technologies"
 acp ctx search --type customer --filter '{"context.measures.health_score":{"lt":50}}'
 acp txn list --types risk_assessed
 acp changes --since 2026-03-01T00:00:00Z
 ```
 
-### 4. Create Your Own Project
+### 4. Connect Claude Desktop
+
+Add to your `claude_desktop_config.json`:
+
+**HTTP mode** (platform running via Docker):
+```json
+{ "mcpServers": { "acp": { "url": "http://localhost:3001/mcp" } } }
+```
+
+**stdio mode** (direct process):
+```json
+{
+  "mcpServers": {
+    "acp": {
+      "command": "node",
+      "args": ["<repo-path>/packages/mcp-server/dist/index.js"],
+      "env": {
+        "ACP_MCP_TRANSPORT": "stdio",
+        "DATABASE_URL": "postgresql://acp:localdev@localhost:5432/acp"
+      }
+    }
+  }
+}
+```
+
+Now ask Claude:
+
+> "Which customers have health scores below 50? What happened recently with each of them?"
+
+> "Show me all overdue invoices over $10,000 and which customers they belong to."
+
+> "What vendors have contracts expiring in the next 90 days?"
+
+Claude calls ACP's MCP tools, gets the context, and reasons across all your business data.
+
+### 5. Load Your Own Data
 
 ```bash
 acp init ~/projects/my-ops       # pick context types interactively
 cd ~/projects/my-ops
 cp ~/downloads/customers.csv data/
 acp connect add csv              # generates pipeline YAML with auto-mapping
+# review pipelines/customers-csv.yaml — adjust mappings if needed
 acp connect sync                 # validates + loads data
 acp ctx list                     # see what's loaded
 ```
+
+---
+
+## Deployment Options
+
+ACP runs anywhere Docker runs. The same code, same data, same CLI — only the infrastructure changes.
+
+### Local (development)
+
+```bash
+docker compose up -d
+# Platform running at localhost:3002 (API) and localhost:3001 (MCP)
+```
+
+### Server (always-on agent)
+
+Same Docker Compose on any Linux server. Your agent runs 24/7, polls the changefeed, acts on changes.
+
+```bash
+ssh myserver
+git clone https://github.com/Kartha-AI/agent-context-platform
+cd agent-context-platform && docker compose up -d
+
+# Set up a cron job to sync data hourly
+0 * * * * cd /path/to/my-project && acp connect sync
+```
+
+### AWS/GCP (team deployment)
+
+Deploy the platform into your own cloud account via CDK. Multiple developers and agents share the same context store.
+
+```bash
+export ACP_ENV=prod
+cd infra && pnpm run deploy
+```
+
+This deploys three stacks:
+1. **acp-{env}-data** — VPC, RDS PostgreSQL, Secrets Manager
+2. **acp-{env}-api** — API Gateway + Lambda functions
+3. **acp-{env}-mcp** — ECS Fargate + ALB + ECR
+
+Your CLI projects just point at the cloud endpoint:
+
+```yaml
+# acp.yaml
+platform:
+  api_url: https://acp-api.your-company.com
+  api_key: ${ACP_API_KEY}
+```
+
+### Kartha Cloud (coming soon)
+
+Managed hosting with team access, audit logs, and SLA guarantees. [Sign up for early access at kartha.ai](https://kartha.ai)
+
+---
+
+## Pre-Built Skills
+
+Skills are pre-built agent workflows that run on top of ACP data. ACP provides the data and the MCP tools. Skills provide the business logic — what to check, how to assess, what to record.
+
+**Skills are NOT code that ACP executes.** They are instructions your agent follows. Your agent runtime (Claude Desktop, CrewAI, LangGraph, or any MCP client) runs the skill. ACP just provides the data.
+
+### What Ships
+
+Five skills ship in the `skills/` directory, mapped to [APQC Process Classification Framework](https://www.apqc.org/process-frameworks) categories:
+
+| Skill | APQC Process | Context Types | What It Does |
+|-------|-------------|---------------|--------------|
+| **Customer Health Monitor** | 3.3.4 Manage Customer Health | customer, case | Polls changefeed, classifies risk (critical/high/medium/low), records `risk_assessed` transactions |
+| **Pipeline Risk Assessment** | 3.2.5 Manage Sales Pipeline | opportunity, customer | Flags stale deals, missing context, overvalued pipeline, records `deal_risk_assessed` |
+| **Invoice Collections Tracker** | 8.3.4 Manage Collections | invoice, customer | Finds overdue invoices, groups by aging bracket, cross-references customer health |
+| **Case Escalation Monitor** | 5.2.3 Manage Escalations | case, customer | Context-aware escalation using ARR, health score, renewal date — not just priority rules |
+| **Vendor Performance Review** | 11.1.3 Assess Vendor Performance | vendor, invoice, contract | Scores vendors on delivery/quality/commercial/relationship, flags contract renewals |
+
+### How Skills Work
+
+Each skill is a directory with a prompt, metadata, and framework-specific examples:
+
+```
+skills/customer-health-monitor/
+├── skill.yaml              # metadata: context types, triggers, APQC reference
+├── prompt.md               # the agent prompt (framework-agnostic)
+├── README.md               # documentation + CLI equivalents
+└── examples/
+    ├── claude-project.md   # paste into Claude Desktop Project
+    └── crewai-agent.py     # ready-to-use CrewAI agent
+```
+
+### Using a Skill with Claude Desktop
+
+1. Connect ACP MCP server (see [Quick Start](#4-connect-claude-desktop))
+2. Create a new Project in Claude Desktop
+3. Open `skills/customer-health-monitor/examples/claude-project.md`
+4. Paste the contents into the Project's system prompt
+5. Ask: "Check customer health" or "Run the health monitor"
+
+Claude follows the skill prompt, calls the MCP tools, assesses each customer, and writes risk assessments back to ACP.
+
+### Using a Skill with CrewAI
+
+```python
+from crewai import Agent, Task, Crew
+from pathlib import Path
+
+skill_prompt = Path("skills/customer-health-monitor/prompt.md").read_text()
+
+health_monitor = Agent(
+    role="Customer Health Monitor",
+    goal="Detect at-risk customers and record assessments in ACP",
+    backstory=skill_prompt,
+    tools=[acp_mcp_tools],
+)
+
+crew = Crew(agents=[health_monitor], tasks=[Task(
+    description="Check for health changes in the last 6 hours",
+    agent=health_monitor
+)])
+crew.kickoff()
+```
+
+### Skills vs Ad-Hoc Questions
+
+You don't need skills to use ACP. Any agent connected via MCP can ask any question about your data:
+
+```
+Ad-hoc:  "What's Acme Corp's ARR?"              → agent calls get_entity, answers
+Ad-hoc:  "Which invoices are overdue?"           → agent calls search_entities, answers
+Ad-hoc:  "Compare our top 5 vendors"             → agent calls search_entities, reasons, answers
+
+Skill:   "Run the health monitor"                → follows defined workflow, records transactions
+Skill:   "Run the monthly vendor review"         → scores each vendor, writes vendor_review transactions
+```
+
+Ad-hoc questions are great for exploration. Skills add consistency, auditability, and agent-to-agent coordination — one skill's output becomes another skill's input via the changefeed.
+
+### Getting Skills with `acp init`
+
+When you create a project, the CLI offers skills that match your selected context types:
+
+```bash
+acp init ~/projects/my-ops
+
+  Context types:
+    [x] customer
+    [x] invoice
+    [x] case
+
+  Skills for your context types:
+    [x] Customer Health Monitor     (uses: customer, case)
+    [x] Invoice Collections Tracker (uses: invoice, customer)
+    [x] Case Escalation Monitor     (uses: case, customer)
+    [ ] Pipeline Risk Assessment    (needs: opportunity — not selected)
+    [ ] Vendor Performance Review   (needs: vendor — not selected)
+```
+
+Selected skills are copied to your project's `skills/` directory where you can customize them.
 
 ---
 
@@ -112,19 +454,21 @@ acp ctx list                     # see what's loaded
 
 ### Query Commands
 
-| Command | Purpose |
-|---------|---------|
-| `acp ctx list` | Entity counts by type |
-| `acp ctx get <type> <name\|id>` | Full entity profile with recent transactions |
-| `acp ctx search --type --query --filter --limit` | Search entities |
-| `acp txn list --object-id --types --since --until` | List transactions |
-| `acp txn add --object-id --type --context` | Record a transaction |
-| `acp changes --since --types --limit` | Changefeed (what changed since timestamp) |
+These mirror the MCP tools — same data, terminal interface.
+
+| Command | MCP Equivalent | Purpose |
+|---------|---------------|---------|
+| `acp ctx list` | — | Entity counts by type |
+| `acp ctx get <type> <name\|id>` | `get_entity` | Full entity profile with recent transactions |
+| `acp ctx search --type --query --filter --limit` | `search_entities` | Search entities |
+| `acp txn list --object-id --types --since --until` | `get_transactions` | List transactions |
+| `acp txn add --object-id --type --context` | `record_transaction` | Record a transaction |
+| `acp changes --since --types --limit` | `get_context_changes` | Changefeed |
 
 ### Query Examples
 
 ```bash
-# Stats
+# Entity counts
 acp ctx list
 
 # Get entity by name or UUID
@@ -190,10 +534,11 @@ pnpm --filter @acp/infra run build
 ## Testing
 
 ```bash
-pnpm run test
+pnpm run test                  # all tests
+pnpm run test:unit             # fast, no DB
+pnpm run test:integration      # needs Postgres
+pnpm run test:e2e              # full pipeline
 ```
-
-Runs vitest across all packages.
 
 ---
 
@@ -241,12 +586,12 @@ DATABASE_URL=postgresql://acp:localdev@localhost:5432/acp pnpm --filter @acp/mcp
 
 The MCP server supports two transports:
 
-**Streamable HTTP (default)** -- for remote agents and Claude.ai:
+**Streamable HTTP (default)** — for remote agents and Claude.ai:
 ```json
 { "mcpServers": { "acp": { "url": "http://localhost:3001/mcp" } } }
 ```
 
-**stdio** -- for Claude Desktop local:
+**stdio** — for Claude Desktop local:
 ```json
 {
   "mcpServers": {
@@ -264,60 +609,6 @@ The MCP server supports two transports:
 
 ---
 
-## Deployment
-
-### Deploy to AWS
-
-```bash
-# Set environment
-export ACP_ENV=dev  # or staging, prod
-
-# Build all packages
-pnpm run build
-
-# Deploy CDK stacks
-cd infra
-pnpm run deploy
-```
-
-This deploys three stacks:
-
-1. **acp-{env}-data** -- VPC, RDS PostgreSQL, Secrets Manager
-2. **acp-{env}-api** -- API Gateway + Lambda functions
-3. **acp-{env}-mcp** -- ECS Fargate + ALB + ECR
-
-### Push MCP server Docker image
-
-After the first deploy, push the MCP container to the ECR repository:
-
-```bash
-# Get the ECR repo URI from stack output
-ECR_URI=$(aws cloudformation describe-stacks \
-  --stack-name acp-dev-mcp \
-  --query "Stacks[0].Outputs[?OutputKey=='EcrRepoUri'].OutputValue" \
-  --output text)
-
-# Build and push
-aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_URI
-docker build -f Dockerfile.mcp -t $ECR_URI:latest .
-docker push $ECR_URI:latest
-
-# Force new deployment
-aws ecs update-service --cluster acp-dev-mcp --service <service-name> --force-new-deployment
-```
-
-### Environment-specific configuration
-
-| Setting | Dev | Prod |
-|---------|-----|------|
-| DB instance | db.t4g.medium | db.r6g.large |
-| Multi-AZ | No | Yes |
-| Deletion protection | No | Yes |
-| Log level | debug | info |
-| Fargate tasks | 1-4 | 1-4 |
-
----
-
 ## Architecture
 
 [View interactive architecture diagram](https://htmlpreview.github.io/?https://github.com/Kartha-AI/agent-context-platform/blob/main/acp-architecture.html)
@@ -326,9 +617,9 @@ aws ecs update-service --cluster acp-dev-mcp --service <service-name> --force-ne
 
 - **Platform is schema-agnostic.** It stores and serves JSONB context objects without opinion on schema. Templates and validation live in the CLI.
 - **API and MCP both use `@acp/core` directly.** Same repositories, same engine, same DB connection pool. No HTTP hop between them.
-- **CLI is a pure HTTP client.** It talks to the REST API. No `@acp/core` dependency.
+- **CLI is a pure HTTP client.** It talks to the REST API. No `@acp/core` dependency. Works against local or remote deployments.
 
-### Deployment Model
+### How the Pieces Fit
 
 ```
                          ┌─────────────────────────────────┐
@@ -366,7 +657,7 @@ aws ecs update-service --cluster acp-dev-mcp --service <service-name> --force-ne
 
 ### Data Flow
 
-**Write Path 1 -- Pipelines write entity context via CLI or REST API:**
+**Write Path 1 — Pipelines write entity context via CLI or REST API:**
 
 ```
 Source data (CSV, JSON, databases)
@@ -375,7 +666,7 @@ Source data (CSV, JSON, databases)
   → Platform deep merges, diffs, writes change_log
 ```
 
-**Write Path 2 -- Agents write back decisions via MCP:**
+**Write Path 2 — Agents write back decisions via MCP:**
 
 ```
 Agent reasons about an entity
@@ -384,7 +675,7 @@ Agent reasons about an entity
   → Other agents discover this on next poll
 ```
 
-**Read Path 1 -- On-demand agent pulls context:**
+**Read Path 1 — On-demand agent pulls context:**
 
 ```
 User: "What's happening with Acme Corp?"
@@ -392,7 +683,7 @@ User: "What's happening with Acme Corp?"
   → Returns full context object with recent transactions
 ```
 
-**Read Path 2 -- Polling agent checks for changes:**
+**Read Path 2 — Polling agent checks for changes:**
 
 ```
 Every 5 minutes, agent wakes up
@@ -409,21 +700,35 @@ Every 5 minutes, agent wakes up
 
 Each entity is a rich, pre-joined, denormalized profile document. Pipelines do the hard work of joining and enriching data from multiple sources so agents get everything in a single call.
 
-### Grouped Context
+### 7-Dimension Schema — Why It Matters for Agents
 
-The context JSONB organizes facts by dimension:
+Most data platforms give agents a flat bag of fields. The agent has to figure out: which fields are dates? Which are numbers? Which tell me about risk? Which tell me who to contact?
+
+ACP organizes every entity's context into 7 semantic dimensions. Agents don't parse — they navigate:
 
 ```json
 {
-  "attributes": {},   // WHAT  -- core identity facts
-  "measures": {},     // HOW MUCH -- quantitative data, KPIs, financials
-  "actors": {},       // WHO -- people, roles, ownership
-  "temporals": {},    // WHEN -- dates, milestones, deadlines
-  "locations": {},    // WHERE -- geography, channels, territories
-  "intents": {},      // WHY -- reasons, strategy, risk factors
-  "processes": {}     // HOW -- workflow state, current stage, methods
+  "attributes": {},   // WHAT  — core identity facts (name, industry, status)
+  "measures": {},     // HOW MUCH — numbers the agent can reason about (ARR, health score, NPS)
+  "actors": {},       // WHO — people to contact, owners, stakeholders
+  "temporals": {},    // WHEN — dates that drive urgency (renewal, last activity, SLA deadline)
+  "locations": {},    // WHERE — geography, territory, timezone
+  "intents": {},      // WHY — strategy, risk signals, churn indicators
+  "processes": {}     // HOW — current stage, workflow state, next steps
 }
 ```
+
+**This structure makes agents faster and more accurate.** An agent assessing customer risk knows exactly where to look:
+
+| Agent task | Dimensions used | What the agent finds |
+|-----------|----------------|---------------------|
+| "Is this customer at risk?" | measures + intents + temporals | health_score: 34, churn_risk: high, renewal_date: 45 days away |
+| "Who should I contact?" | actors + attributes | primary_contact: Jane Lee, role: VP Engineering, owner: Sarah Chen |
+| "What happened recently?" | Recent transactions | risk_assessed 2 days ago, case_opened last week, NPS dropped |
+| "What's the financial picture?" | measures | ARR: $480K, MRR: $40K, lifetime_value: $1.2M, open_cases: 3 |
+| "How urgent is this?" | temporals + processes | renewal in 45 days, onboarding: completed, SLA: at_risk |
+
+Without this structure, every agent prompt needs to say "look at field X, Y, Z and interpret them as dates/numbers/risk signals." With ACP, the schema does that work once — every agent benefits.
 
 ### Standard Templates
 
@@ -442,15 +747,15 @@ The context JSONB organizes facts by dimension:
 | `catalog-product` | entity/product | Catalog |
 | `hr-employee` | entity/employee | HR |
 
-Templates are YAML files that define fields, types, enums, and allowed transaction types. `acp init` copies selected templates into your project's `contexts/` directory where they can be customized.
+Templates are YAML files that define fields, types, descriptions, and allowed transaction types. `acp init` copies selected templates into your project's `contexts/` directory where you can customize them.
 
 ### Database Schema
 
 Three tables back the platform:
 
-- **context_objects** -- Entity profiles with JSONB context, trigram name index, GIN JSONB index, pgvector embedding column, composite unique index on source reference
-- **context_transactions** -- Activity history linked to entities, indexed by object + time and by type + time
-- **change_log** -- Powers the changefeed polling pattern, indexed by changed_at for cursor-based pagination
+- **context_objects** — Entity profiles with JSONB context, trigram name index, GIN JSONB index, pgvector embedding column, composite unique index on source reference
+- **context_transactions** — Activity history linked to entities, indexed by object + time and by type + time
+- **change_log** — Powers the changefeed polling pattern, indexed by changed_at for cursor-based pagination
 
 ---
 
@@ -480,7 +785,7 @@ The MCP server exposes 5 tools. Supports both Streamable HTTP and stdio transpor
 | `GET` | `/v1/objects/:id/txns` | Get transactions for an entity |
 | `POST` | `/v1/objects/:id/txns` | Record a transaction for an entity |
 | `GET` | `/v1/objects/txns` | Query transactions across all entities |
-| `GET` | `/v1/objects/changes` | Changefeed -- what changed since timestamp |
+| `GET` | `/v1/objects/changes` | Changefeed — what changed since timestamp |
 | `GET` | `/v1/health` | Health check |
 
 Authentication: `Authorization: Bearer <api-key>` header. All endpoints except `/v1/health`.
@@ -523,7 +828,7 @@ acp/
 │   │       │   ├── migrate.ts      # runMigrations() + standalone runner
 │   │       │   ├── migrations/     # SQL schema
 │   │       │   └── repositories/   # context-object.repo, transaction.repo, change-log.repo
-│   │       └── engine/             # deep-merge, diff, snapshot, validator
+│   │       └── engine/             # deep-merge, diff, snapshot
 │   ├── api/                        # REST API
 │   │   └── src/
 │   │       ├── handlers/           # upsert-object, bulk-upsert, get-object, get-stats,
@@ -546,8 +851,7 @@ acp/
 │       │   ├── pipelines/          # YAML parser, mapper, auto-mapper
 │       │   └── demo/              # Demo CSVs + pipeline YAMLs
 │       └── standard-templates/    # 10 YAML templates (CRM, finance, legal, logistics, catalog, HR)
-├── templates/                      # Legacy TypeScript templates (reference only)
-├── infra/                          # AWS CDK (DataStack, ApiStack, McpStack)
+├── infra/                          # AWS/GCP CDK (DataStack, ApiStack, McpStack)
 ├── scripts/                        # migrate, seed, test-mcp
 ├── docker-compose.yml              # Postgres + API + MCP server
 ├── Dockerfile.api                  # API container image
@@ -567,6 +871,28 @@ acp/
 | Logging | pino (structured JSON) |
 | MCP SDK | @modelcontextprotocol/sdk |
 | CLI | commander + inquirer + chalk |
-| API | Raw Lambda handlers (no Express) |
+| API | Lambda handlers + local HTTP server |
 | IaC | AWS CDK (TypeScript) |
 | Testing | vitest |
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+Key rules:
+- All existing tests must pass on every PR
+- New templates: just add a YAML file — test loop covers it automatically
+- New connectors: include extractor tests + e2e sync test
+- Core engine changes (deep-merge, diff): require extra review
+
+---
+
+## License
+
+[MIT](LICENSE)
+
+---
+
+Built by [Kartha AI](https://kartha.ai) — कर्ता: Sanskrit for "the one who acts"

@@ -1,0 +1,17 @@
+name: vendor-performance-review
+description: "Conducts periodic vendor assessments across delivery, quality, commercial, and relationship dimensions with contract renewal alerts"
+version: "1.0"
+category: procurement-operations
+requires: [vendor]
+optional: [invoice, contract]
+operations: [search_entities, get_entity, get_transactions, record_transaction]
+trigger:
+  recommended: schedule
+  interval: monthly
+  description: "Run monthly, or manually before procurement reviews and contract renewals"
+outputs:
+  transaction_type: vendor_review
+  context_fields: [review_period, overall_score, overall_recommendation, dimension_scores, strengths, concerns, recommended_actions, contract_alert]
+apqc:
+  category: "11. Manage External Relationships"
+  process: "11.1.3 Assess Vendor Performance"
