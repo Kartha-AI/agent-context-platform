@@ -3,31 +3,60 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ACP — One Page Overview</title>
+<title>ACP V1 — One Page Overview</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
+:root {
+  --brand-blue: #00A8D6;
+  --brand-teal: #00BFA5;
+  --brand-mint: #00E07A;
+  --brand-grad: linear-gradient(135deg, #00A8D6, #00CCA8, #00E07A);
+
+  --pastel-blue: #E6F7FC;
+  --pastel-teal: #E0F5F0;
+  --pastel-mint: #E2FAF0;
+  --pastel-cyan: #E0F7FA;
+  --pastel-green: #E6F9ED;
+  --pastel-slate: #EDF1F4;
+
+  --accent-blue: #0091B8;
+  --accent-teal: #00A68B;
+  --accent-mint: #00C268;
+  --accent-cyan: #0097A7;
+  --accent-green: #1B9E4B;
+  --accent-slate: #5A7285;
+
+  --text-primary: #163040;
+  --text-secondary: #3D6070;
+  --text-muted: #7A9AAD;
+  --text-dim: #A8C0CC;
+
+  --bg: #F6FAF9;
+  --card-bg: #FFFFFF;
+  --border-light: #D0E8E4;
+}
+
 * { margin:0; padding:0; box-sizing:border-box; }
 
 body {
-  background: #f0ece3;
+  background: var(--bg);
   font-family: 'Cabinet Grotesk', sans-serif;
   min-height: 100vh;
-  color: #1a1a2e;
+  color: var(--text-primary);
 }
 
 .page {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 36px 32px 48px;
 }
 
-/* ── HEADER ── */
 .header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 32px;
-  border-bottom: 2px solid #1a1a2e;
+  border-bottom: 2px solid var(--text-primary);
   padding-bottom: 20px;
 }
 
@@ -36,71 +65,50 @@ body {
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1;
-  color: #1a1a2e;
 }
 
-.header-left h1 span { color: #2563eb; }
+.header-left h1 span {
+  background: var(--brand-grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
 .header-left p {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 10px;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-top: 6px;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
 .header-right {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 6px;
+  gap: 5px;
 }
 
 .badge {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   padding: 3px 10px;
-  border-radius: 3px;
+  border-radius: 4px;
   border: 1.5px solid;
 }
 
-.badge-blue  { color: #2563eb; border-color: #2563eb; background: #eff6ff; }
-.badge-amber { color: #b45309; border-color: #b45309; background: #fffbeb; }
-.badge-green { color: #065f46; border-color: #065f46; background: #ecfdf5; }
+.badge-blue { color: var(--accent-blue); border-color: var(--accent-blue); background: var(--pastel-blue); }
+.badge-teal { color: var(--accent-teal); border-color: var(--accent-teal); background: var(--pastel-teal); }
+.badge-mint { color: var(--accent-mint); border-color: var(--accent-mint); background: var(--pastel-mint); }
+.badge-cyan { color: var(--accent-cyan); border-color: var(--accent-cyan); background: var(--pastel-cyan); }
 
-/* ── MAIN GRID ── */
-.main {
-  display: grid;
-  grid-template-columns: 200px 1fr 200px;
-  grid-template-rows: auto auto auto auto;
-  gap: 0;
-  position: relative;
-}
-
-/* ── COLUMN HEADERS ── */
-.col-header {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  padding: 6px 12px;
-  text-align: center;
-  margin-bottom: 8px;
-}
-
-.col-header.left  { color: #b45309; background: #fef3c7; border: 1.5px solid #b45309; border-radius: 4px; }
-.col-header.mid   { color: #1e3a8a; background: #dbeafe; border: 1.5px solid #1e3a8a; border-radius: 4px; }
-.col-header.right { color: #065f46; background: #d1fae5; border: 1.5px solid #065f46; border-radius: 4px; }
-
-/* ── SECTIONS ── */
 .section {
-  border: 1.5px solid #1a1a2e;
+  border: 1.5px solid var(--border-light);
   border-radius: 8px;
-  background: #fff;
+  background: var(--card-bg);
   padding: 14px;
   margin: 4px;
 }
@@ -114,62 +122,42 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #1a1a2e;
 }
 
-.section-title::before {
-  content: '';
-  display: block;
-  width: 10px;
-  height: 10px;
+.section-title .dot-m {
+  width: 10px; height: 10px;
   border-radius: 2px;
   flex-shrink: 0;
 }
 
-.section.amber .section-title::before { background: #f59e0b; }
-.section.blue  .section-title::before { background: #2563eb; }
-.section.purple .section-title::before { background: #7c3aed; }
-.section.green .section-title::before { background: #10b981; }
-.section.slate .section-title::before { background: #64748b; }
+.section.s-blue { border-color: #8ED5EC; }
+.section.s-teal { border-color: #8EDBC8; }
+.section.s-cyan { border-color: #80D8E0; }
+.section.s-green { border-color: #80D4A0; }
+.section.s-slate { border-color: #B4C8D4; }
 
-.section.amber { border-color: #f59e0b; }
-.section.blue  { border-color: #2563eb; }
-.section.purple { border-color: #7c3aed; }
-.section.green { border-color: #10b981; }
-
-/* ── CHIPS ── */
-.chip-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
+.chip-grid { display: flex; flex-wrap: wrap; gap: 5px; }
 
 .chip {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 9px;
   padding: 3px 8px;
-  border-radius: 3px;
+  border-radius: 4px;
   border: 1px solid;
   line-height: 1.3;
 }
 
-.chip.amber  { color: #92400e; border-color: #fbbf24; background: #fffbeb; }
-.chip.blue   { color: #1e3a8a; border-color: #93c5fd; background: #eff6ff; }
-.chip.purple { color: #4c1d95; border-color: #c4b5fd; background: #f5f3ff; }
-.chip.green  { color: #064e3b; border-color: #6ee7b7; background: #ecfdf5; }
-.chip.slate  { color: #334155; border-color: #cbd5e1; background: #f8fafc; }
+.chip-blue { color: var(--accent-blue); border-color: #A8DCF0; background: var(--pastel-blue); }
+.chip-teal { color: var(--accent-teal); border-color: #A0DCC8; background: var(--pastel-teal); }
+.chip-cyan { color: var(--accent-cyan); border-color: #88D4E0; background: var(--pastel-cyan); }
+.chip-slate { color: var(--accent-slate); border-color: #C0D0DC; background: var(--pastel-slate); }
 
-/* ── MONO LIST ── */
-.mono-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+.mono-list { display: flex; flex-direction: column; gap: 4px; }
 
 .mono-item {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 9px;
-  color: #374151;
+  color: var(--text-secondary);
   display: flex;
   align-items: flex-start;
   gap: 6px;
@@ -177,51 +165,72 @@ body {
 }
 
 .mono-item .dot {
-  width: 5px;
-  height: 5px;
+  width: 5px; height: 5px;
   border-radius: 50%;
   margin-top: 3px;
   flex-shrink: 0;
 }
 
-.dot-amber  { background: #f59e0b; }
-.dot-blue   { background: #2563eb; }
-.dot-purple { background: #7c3aed; }
-.dot-green  { background: #10b981; }
-.dot-slate  { background: #94a3b8; }
-
-/* ── ARROW CONNECTORS (SVG overlay) ── */
-.diagram-wrapper {
-  position: relative;
+.flow-row {
+  display: grid;
+  grid-template-columns: 220px 28px 1fr 28px 220px;
+  align-items: stretch;
+  gap: 0;
+  margin: 4px 0;
 }
 
-svg.arrows {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  overflow: visible;
-}
-
-/* ── CENTER COLUMN ── */
-.center-col {
+.arrow-col {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
 }
 
-/* ── FLOW LABELS ── */
-.flow-label {
+.arrow-col span {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 8px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-size: 7px;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  text-align: center;
-  padding: 3px 0;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  line-height: 1;
 }
 
-/* ── DB TABLE ── */
+.arrow-sym { font-size: 16px; line-height: 1; }
+
+.com-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.com-cell {
+  border: 1px solid #A0DCC8;
+  border-radius: 5px;
+  padding: 6px 4px;
+  text-align: center;
+  background: var(--pastel-teal);
+}
+
+.com-icon { font-size: 12px; }
+.com-key {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 7.5px;
+  font-weight: 700;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+  margin: 2px 0 1px;
+}
+.com-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 7px;
+  color: var(--text-muted);
+}
+
 .db-row {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -230,17 +239,17 @@ svg.arrows {
 }
 
 .db-table {
-  border: 1px solid #d1fae5;
+  border: 1px solid #A0E8C0;
   border-radius: 5px;
   padding: 8px;
-  background: #f0fdf4;
+  background: var(--pastel-mint);
 }
 
 .db-table-name {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 9px;
   font-weight: 600;
-  color: #065f46;
+  color: var(--accent-mint);
   margin-bottom: 5px;
   display: flex;
   align-items: center;
@@ -250,262 +259,205 @@ svg.arrows {
 .db-col {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 8px;
-  color: #6b7280;
+  color: var(--text-secondary);
   padding: 1px 0;
-  border-bottom: 1px solid #d1fae5;
+  border-bottom: 1px solid #C0ECDA;
   display: flex;
   justify-content: space-between;
 }
-
 .db-col:last-child { border: none; }
-.db-col .type { color: #9ca3af; }
+.db-col .type { color: var(--text-muted); }
 
-/* ── COM STRIP ── */
-.com-strip {
+.template-strip {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 4px;
   margin-top: 8px;
 }
 
-.com-cell {
-  border: 1px solid #e0d7ff;
-  border-radius: 4px;
+.tmpl-cell {
+  border: 1px solid #88D4E0;
+  border-radius: 5px;
   padding: 6px 4px;
   text-align: center;
-  background: #faf5ff;
+  background: var(--pastel-cyan);
 }
 
-.com-icon { font-size: 12px; }
-.com-key {
+.tmpl-cat {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 7.5px;
-  font-weight: 700;
-  color: #6d28d9;
+  font-size: 6px;
+  color: var(--text-muted);
   text-transform: uppercase;
-  margin: 2px 0 1px;
+  letter-spacing: 0.15em;
 }
 
-.com-val {
+.tmpl-name {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 7px;
-  color: #9ca3af;
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  margin-top: 1px;
 }
 
-/* ── FOOTER STRIP ── */
 .footer-strip {
   margin-top: 20px;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 8px;
-  border-top: 2px solid #1a1a2e;
+  border-top: 2px solid var(--text-primary);
   padding-top: 16px;
 }
 
-.footer-item {
-  text-align: center;
-}
-
+.footer-item { text-align: center; }
 .footer-item-label {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 8px;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-bottom: 4px;
 }
-
 .footer-item-value {
-  font-size: 12px;
-  font-weight: 700;
-  color: #1a1a2e;
-}
-
-/* ── LAYOUT ZONES ── */
-.zone-left  { grid-column: 1; }
-.zone-mid   { grid-column: 2; }
-.zone-right { grid-column: 3; }
-.zone-full  { grid-column: 1 / -1; }
-
-/* ── ARROW BETWEEN ZONES ── */
-.h-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 2px;
-  color: #9ca3af;
-  font-size: 14px;
-}
-
-/* Three-column data flow row */
-.flow-row {
-  display: grid;
-  grid-template-columns: 200px 28px 1fr 28px 200px;
-  align-items: center;
-  gap: 0;
-  margin: 4px 0;
-}
-
-.arrow-col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
-.arrow-col span {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 7px;
-  color: #9ca3af;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: rotate(180deg);
-  line-height: 1;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
-.arrow-sym {
-  font-size: 16px;
-  line-height: 1;
+@media (max-width: 900px) {
+  .flow-row { grid-template-columns: 1fr; }
+  .arrow-col { display: none; }
+  .com-strip { grid-template-columns: repeat(4, 1fr); }
+  .db-row { grid-template-columns: 1fr; }
+  .template-strip { grid-template-columns: repeat(3, 1fr); }
+  .footer-strip { grid-template-columns: repeat(3, 1fr); }
 }
-
-.arrow-amber { color: #f59e0b; }
-.arrow-blue  { color: #2563eb; }
-.arrow-green { color: #10b981; }
-
-/* divider */
-.divider {
-  grid-column: 1/-1;
-  height: 1px;
-  background: #e5e7eb;
-  margin: 8px 4px;
-}
-
 </style>
 </head>
 <body>
 <div class="page">
 
-  <!-- HEADER -->
   <div class="header">
     <div class="header-left">
       <h1>Agent Context <span>Platform</span></h1>
-      <p>UNIFIED · AI-AGENT-OPTIMIZED · SINGLE CONTEXT STORE · AWS CDK DEPLOYABLE</p>
+      <p>V1 · CLI + MCP + REST API · SCHEMA-AGNOSTIC STORE · DOCKER COMPOSE (LOCAL) · AWS/GCP (PROD)</p>
     </div>
     <div class="header-right">
-      <div class="badge badge-blue">PostgreSQL 16 + pgvector</div>
-      <div class="badge badge-amber">Lambda + ECS Fargate</div>
-      <div class="badge badge-green">MCP · Streamable HTTP</div>
+      <div class="badge badge-blue">CLI · @kartha/acp-cli</div>
+      <div class="badge badge-cyan">PostgreSQL 16 + pgvector</div>
+      <div class="badge badge-teal">Docker Compose · AWS/GCP</div>
+      <div class="badge badge-mint">MCP · HTTP + stdio</div>
     </div>
   </div>
 
-  <!-- ROW 1: Sources → REST API → Core → MCP → Agents -->
+  <!-- THREE-COLUMN FLOW -->
   <div class="flow-row">
 
-    <!-- LEFT: Source Systems -->
-    <div class="section amber" style="height:100%">
-      <div class="section-title">Source Systems</div>
-      <div class="chip-grid">
-        <div class="chip amber">☁️ Salesforce</div>
-        <div class="chip amber">❄️ Snowflake</div>
-        <div class="chip amber">🗄️ SQL DBs</div>
-        <div class="chip amber">🏢 SAP</div>
-        <div class="chip amber">🔶 Oracle</div>
-        <div class="chip amber">⚙️ Airflow</div>
-        <div class="chip amber">🔧 Glue</div>
-        <div class="chip amber">📐 Step Fn</div>
-      </div>
-      <div style="margin-top:10px">
-        <div class="mono-list">
-          <div class="mono-item"><div class="dot dot-amber"></div>Map fields to canonical model</div>
-          <div class="mono-item"><div class="dot dot-amber"></div>POST /v1/objects (upsert)</div>
-          <div class="mono-item"><div class="dot dot-amber"></div>POST /v1/objects/:id/txns</div>
-          <div class="mono-item"><div class="dot dot-amber"></div>Scheduled or event-driven</div>
+    <!-- LEFT: Developer Project -->
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div class="section s-blue" style="flex:1">
+        <div class="section-title"><div class="dot-m" style="background:var(--accent-blue)"></div>Developer Project: With their Context</div>
+        <div class="chip-grid">
+          <div class="chip chip-blue">📋 contexts/*.yaml</div>
+          <div class="chip chip-blue">🔀 pipelines/*.yaml</div>
+          <div class="chip chip-blue">📊 data/*.csv</div>
+          <div class="chip chip-blue">⚙️ acp.yaml</div>
+        </div>
+        <div style="margin-top:10px">
+          <div class="mono-list">
+            <div class="mono-item"><div class="dot" style="background:var(--accent-blue)"></div>acp init — pick templates</div>
+            <div class="mono-item"><div class="dot" style="background:var(--accent-blue)"></div>acp connect add — map fields</div>
+            <div class="mono-item"><div class="dot" style="background:var(--accent-blue)"></div>acp connect sync — load data</div>
+            <div class="mono-item"><div class="dot" style="background:var(--brand-teal)"></div>acp ctx search — query data</div>
+            <div class="mono-item"><div class="dot" style="background:var(--brand-teal)"></div>acp changes — poll changefeed</div>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text-muted);text-align:center;border-top:1px solid #A8DCF0;padding-top:6px">
+          CLI validates against templates<br>before POSTing to REST API
         </div>
       </div>
     </div>
 
-    <!-- ARROW LEFT → CENTER -->
+    <!-- ARROW -->
     <div class="arrow-col">
-      <div class="arrow-sym arrow-amber">→</div>
-      <span>REST</span>
+      <div class="arrow-sym" style="color:var(--accent-blue)">→</div>
+      <span>HTTP</span>
     </div>
 
-    <!-- CENTER: ACP Core -->
+    <!-- CENTER: Platform -->
     <div style="display:flex;flex-direction:column;gap:6px;margin:4px 0">
 
-      <!-- REST API -->
-      <div class="section blue">
-        <div class="section-title">REST API &nbsp;<span style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:400;color:#6b7280">API Gateway + Lambda · scales to zero</span></div>
+      <div class="section s-cyan">
+        <div class="section-title"><div class="dot-m" style="background:var(--accent-cyan)"></div>REST API :3002 &nbsp;<span style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:400;color:var(--text-muted)">uses @acp/core · direct DB · schema-agnostic</span></div>
         <div class="chip-grid">
-          <div class="chip blue">POST /v1/objects</div>
-          <div class="chip blue">POST /v1/objects/bulk</div>
-          <div class="chip blue">POST /v1/objects/:id/txns</div>
-          <div class="chip blue">GET /v1/objects/:id</div>
-          <div class="chip blue">GET /v1/objects/changes</div>
-          <div class="chip blue">GET /v1/health</div>
+          <div class="chip chip-cyan">POST /v1/objects</div>
+          <div class="chip chip-cyan">POST /v1/objects/bulk</div>
+          <div class="chip chip-cyan">POST /:id/txns</div>
+          <div class="chip chip-cyan">GET /search</div>
+          <div class="chip chip-cyan">GET /stats</div>
+          <div class="chip chip-cyan">GET /changes</div>
+          <div class="chip chip-cyan">GET /:id</div>
+          <div class="chip chip-cyan">GET /:id/txns</div>
         </div>
       </div>
 
-      <!-- ACE Engine -->
-      <div class="section slate">
-        <div class="section-title">Agent Context Engine &nbsp;<span style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:400;color:#6b7280">@acp/core · shared by both paths</span></div>
+      <div class="section s-slate" style="border-color:#B4C8D4">
+        <div class="section-title"><div class="dot-m" style="background:var(--accent-slate)"></div>@acp/core &nbsp;<span style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:400;color:var(--text-muted)">shared library · imported by REST API + MCP Server</span></div>
         <div class="chip-grid">
-          <div class="chip slate">🔀 Deep Merge</div>
-          <div class="chip slate">📊 Change Detection</div>
-          <div class="chip slate">📸 Context Snapshot</div>
-          <div class="chip slate">✅ AJV Validator</div>
-          <div class="chip slate">🔑 Template Registry</div>
-          <div class="chip slate">📝 Change Log Writer</div>
+          <div class="chip chip-slate">🔀 Deep Merge</div>
+          <div class="chip chip-slate">📊 Change Detection</div>
+          <div class="chip chip-slate">📸 Snapshot</div>
+          <div class="chip chip-slate">🗄️ Repositories</div>
+          <div class="chip chip-slate">📝 Change Log</div>
+          <div class="chip chip-slate">🔌 pg.Pool</div>
         </div>
       </div>
 
-      <!-- MCP Server -->
-      <div class="section purple">
-        <div class="section-title">MCP Server &nbsp;<span style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:400;color:#6b7280">ECS Fargate · ALB · always warm · 1–4 tasks</span></div>
+      <div class="section s-teal">
+        <div class="section-title"><div class="dot-m" style="background:var(--accent-teal)"></div>MCP Server :3001 &nbsp;<span style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:400;color:var(--text-muted)">uses @acp/core · direct DB · HTTP + stdio</span></div>
         <div class="chip-grid">
-          <div class="chip purple">🔎 get_entity</div>
-          <div class="chip purple">🔍 search_entities</div>
-          <div class="chip purple">📋 get_transactions</div>
-          <div class="chip purple">📡 get_context_changes</div>
-          <div class="chip purple">✍️ record_transaction</div>
+          <div class="chip chip-teal">🔎 get_entity</div>
+          <div class="chip chip-teal">🔍 search_entities</div>
+          <div class="chip chip-teal">📋 get_transactions</div>
+          <div class="chip chip-teal">📡 get_context_changes</div>
+          <div class="chip chip-teal">✍️ record_transaction</div>
         </div>
       </div>
-
     </div>
 
-    <!-- ARROW CENTER → RIGHT -->
+    <!-- ARROW -->
     <div class="arrow-col">
-      <div class="arrow-sym arrow-purple">→</div>
+      <div class="arrow-sym" style="color:var(--accent-teal)">→</div>
       <span>MCP</span>
     </div>
 
-    <!-- RIGHT: AI Agents -->
-    <div class="section purple" style="height:100%">
-      <div class="section-title">AI Agents</div>
+    <!-- RIGHT: Agents -->
+    <div class="section s-teal" style="height:100%">
+      <div class="section-title"><div class="dot-m" style="background:var(--accent-teal)"></div>AI Agents</div>
       <div class="chip-grid">
-        <div class="chip purple">🤖 On-demand</div>
-        <div class="chip purple">⏱️ Polling</div>
-        <div class="chip purple">🔎 Search</div>
-        <div class="chip purple">✍️ Write-back</div>
+        <div class="chip chip-teal">🤖 Claude Desktop</div>
+        <div class="chip chip-teal">💻 Cursor</div>
+        <div class="chip chip-teal">🧠 CrewAI</div>
+        <div class="chip chip-teal">🔗 LangGraph</div>
+        <div class="chip chip-teal">⚡ Custom</div>
       </div>
       <div style="margin-top:10px">
         <div class="mono-list">
-          <div class="mono-item"><div class="dot dot-purple"></div>Pull full entity profile</div>
-          <div class="mono-item"><div class="dot dot-purple"></div>Poll changefeed every 5m</div>
-          <div class="mono-item"><div class="dot dot-purple"></div>Filter by JSONB / text</div>
-          <div class="mono-item"><div class="dot dot-purple"></div>Record decisions back</div>
+          <div class="mono-item"><div class="dot" style="background:var(--accent-teal)"></div>Pull full entity profiles</div>
+          <div class="mono-item"><div class="dot" style="background:var(--accent-teal)"></div>Search by filters / text</div>
+          <div class="mono-item"><div class="dot" style="background:var(--accent-teal)"></div>Poll changefeed</div>
+          <div class="mono-item"><div class="dot" style="background:var(--accent-teal)"></div>Record decisions back</div>
+          <div class="mono-item"><div class="dot" style="background:var(--accent-teal)"></div>HTTP or stdio transport</div>
         </div>
       </div>
     </div>
 
-  </div><!-- end flow-row -->
+  </div>
 
-  <!-- ROW 2: Context Object Model -->
-  <div class="section purple" style="margin: 8px 0">
-    <div class="section-title">Context Object Model &nbsp;<span style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:400;color:#6b7280">Uniform schema for every entity — the "Facebook profile" pattern</span></div>
+  <!-- 7-DIMENSION SCHEMA -->
+  <div class="section s-teal" style="margin: 8px 0">
+    <div class="section-title"><div class="dot-m" style="background:var(--accent-teal)"></div>7-Dimension Schema &nbsp;<span style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:400;color:var(--text-muted)">every entity follows this shape · defined in template YAMLs · validated by CLI</span></div>
     <div class="com-strip">
       <div class="com-cell"><div class="com-icon">🏷️</div><div class="com-key">attributes</div><div class="com-val">WHAT</div></div>
       <div class="com-cell"><div class="com-icon">📈</div><div class="com-key">measures</div><div class="com-val">HOW MUCH</div></div>
@@ -517,59 +469,40 @@ svg.arrows {
     </div>
   </div>
 
-  <!-- ROW 3: Database -->
-  <div class="section green" style="margin: 8px 0">
-    <div class="section-title">PostgreSQL 16 · RDS &nbsp;<span style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:400;color:#6b7280">pgvector + pg_trgm · private subnet · Secrets Manager</span></div>
+  <!-- DATABASE -->
+  <div class="section s-green" style="margin: 8px 0; border-color:#80D4A0">
+    <div class="section-title"><div class="dot-m" style="background:var(--accent-green)"></div>PostgreSQL 16 &nbsp;<span style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:400;color:var(--text-muted)">pgvector + pg_trgm · Docker (local) · RDS / Cloud SQL (prod) · schema-agnostic JSONB</span></div>
     <div class="db-row">
-      <div class="db-table">
-        <div class="db-table-name">🗂️ context_objects</div>
-        <div class="db-col"><span>object_id</span><span class="type">UUID PK</span></div>
-        <div class="db-col"><span>canonical_name</span><span class="type">TEXT gin_trgm</span></div>
-        <div class="db-col"><span>context</span><span class="type">JSONB GIN</span></div>
-        <div class="db-col"><span>embedding</span><span class="type">vector(1536)</span></div>
-        <div class="db-col"><span>source_refs</span><span class="type">JSONB</span></div>
-      </div>
-      <div class="db-table">
-        <div class="db-table-name">⚡ context_transactions</div>
-        <div class="db-col"><span>transaction_id</span><span class="type">UUID PK</span></div>
-        <div class="db-col"><span>object_id</span><span class="type">FK → objects</span></div>
-        <div class="db-col"><span>transaction_type</span><span class="type">TEXT</span></div>
-        <div class="db-col"><span>occurred_at</span><span class="type">TIMESTAMPTZ</span></div>
-        <div class="db-col"><span>context / actors</span><span class="type">JSONB</span></div>
-      </div>
-      <div class="db-table">
-        <div class="db-table-name">📡 change_log</div>
-        <div class="db-col"><span>change_id</span><span class="type">UUID PK</span></div>
-        <div class="db-col"><span>change_type</span><span class="type">TEXT</span></div>
-        <div class="db-col"><span>changes</span><span class="type">JSONB diff</span></div>
-        <div class="db-col"><span>context_snapshot</span><span class="type">JSONB</span></div>
-        <div class="db-col"><span>changed_at ↓ IDX</span><span class="type">changefeed</span></div>
-      </div>
+      <div class="db-table"><div class="db-table-name">🗂️ context_objects</div><div class="db-col"><span>object_id</span><span class="type">UUID PK</span></div><div class="db-col"><span>canonical_name</span><span class="type">TEXT gin_trgm</span></div><div class="db-col"><span>context</span><span class="type">JSONB GIN</span></div><div class="db-col"><span>embedding</span><span class="type">vector(1536)</span></div><div class="db-col"><span>source_refs</span><span class="type">JSONB</span></div></div>
+      <div class="db-table"><div class="db-table-name">⚡ context_transactions</div><div class="db-col"><span>transaction_id</span><span class="type">UUID PK</span></div><div class="db-col"><span>object_id</span><span class="type">FK → objects</span></div><div class="db-col"><span>transaction_type</span><span class="type">TEXT</span></div><div class="db-col"><span>occurred_at</span><span class="type">TIMESTAMPTZ</span></div><div class="db-col"><span>context / actors</span><span class="type">JSONB</span></div></div>
+      <div class="db-table"><div class="db-table-name">📡 change_log</div><div class="db-col"><span>change_id</span><span class="type">UUID PK</span></div><div class="db-col"><span>change_type</span><span class="type">TEXT</span></div><div class="db-col"><span>changes</span><span class="type">JSONB diff</span></div><div class="db-col"><span>context_snapshot</span><span class="type">JSONB</span></div><div class="db-col"><span>changed_at ↓ IDX</span><span class="type">changefeed</span></div></div>
     </div>
   </div>
 
-  <!-- FOOTER STRIP -->
+  <!-- TEMPLATES -->
+  <div class="section s-cyan" style="margin: 8px 0">
+    <div class="section-title"><div class="dot-m" style="background:var(--accent-cyan)"></div>10 Standard Templates &nbsp;<span style="font-family:'IBM Plex Mono',monospace;font-size:8px;font-weight:400;color:var(--text-muted)">YAML · bundled in CLI · copied to project by `acp init` · editable</span></div>
+    <div class="template-strip">
+      <div class="tmpl-cell"><div class="tmpl-cat">CRM</div><div class="tmpl-name">customer</div></div>
+      <div class="tmpl-cell"><div class="tmpl-cat">CRM</div><div class="tmpl-name">contact</div></div>
+      <div class="tmpl-cell"><div class="tmpl-cat">CRM</div><div class="tmpl-name">opportunity</div></div>
+      <div class="tmpl-cell"><div class="tmpl-cat">CRM</div><div class="tmpl-name">case</div></div>
+      <div class="tmpl-cell"><div class="tmpl-cat">CRM</div><div class="tmpl-name">vendor</div></div>
+      <div class="tmpl-cell"><div class="tmpl-cat">Finance</div><div class="tmpl-name">invoice</div></div>
+      <div class="tmpl-cell"><div class="tmpl-cat">Legal</div><div class="tmpl-name">contract</div></div>
+      <div class="tmpl-cell"><div class="tmpl-cat">Logistics</div><div class="tmpl-name">shipment</div></div>
+      <div class="tmpl-cell"><div class="tmpl-cat">Commerce</div><div class="tmpl-name">product</div></div>
+      <div class="tmpl-cell"><div class="tmpl-cat">HR</div><div class="tmpl-name">employee</div></div>
+    </div>
+  </div>
+
   <div class="footer-strip">
-    <div class="footer-item">
-      <div class="footer-item-label">Language</div>
-      <div class="footer-item-value" style="font-family:'IBM Plex Mono',monospace;font-size:11px">TypeScript strict</div>
-    </div>
-    <div class="footer-item">
-      <div class="footer-item-label">Monorepo</div>
-      <div class="footer-item-value" style="font-family:'IBM Plex Mono',monospace;font-size:11px">pnpm workspaces</div>
-    </div>
-    <div class="footer-item">
-      <div class="footer-item-label">IaC</div>
-      <div class="footer-item-value" style="font-family:'IBM Plex Mono',monospace;font-size:11px">AWS CDK</div>
-    </div>
-    <div class="footer-item">
-      <div class="footer-item-label">MCP Transport</div>
-      <div class="footer-item-value" style="font-family:'IBM Plex Mono',monospace;font-size:11px">Streamable HTTP</div>
-    </div>
-    <div class="footer-item">
-      <div class="footer-item-label">Validation</div>
-      <div class="footer-item-value" style="font-family:'IBM Plex Mono',monospace;font-size:11px">AJV + Zod</div>
-    </div>
+    <div class="footer-item"><div class="footer-item-label">Language</div><div class="footer-item-value">TypeScript strict</div></div>
+    <div class="footer-item"><div class="footer-item-label">Monorepo</div><div class="footer-item-value">pnpm workspaces</div></div>
+    <div class="footer-item"><div class="footer-item-label">Local</div><div class="footer-item-value">Docker Compose</div></div>
+    <div class="footer-item"><div class="footer-item-label">Production</div><div class="footer-item-value">AWS/GCP</div></div>
+    <div class="footer-item"><div class="footer-item-label">MCP</div><div class="footer-item-value">HTTP + stdio</div></div>
+    <div class="footer-item"><div class="footer-item-label">CLI</div><div class="footer-item-value">@kartha/acp-cli</div></div>
   </div>
 
 </div>

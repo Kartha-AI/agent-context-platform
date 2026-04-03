@@ -11,7 +11,7 @@ Three interfaces access the same data:
 
 [View interactive architecture diagram](https://htmlpreview.github.io/?https://github.com/Kartha-AI/agent-context-platform/blob/main/acp-architecture.html)
 
-![ACP Overview](acp-overview1.png)
+![ACP Overview](acp-overview.png)
 
 ---
 

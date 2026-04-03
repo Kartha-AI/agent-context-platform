@@ -3,861 +3,772 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agent Context Platform — Architecture</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Agent Context Platform — V1 Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #080c14;
-    --surface: #0d1520;
-    --surface2: #111d2e;
-    --border: #1e3048;
-    --border-bright: #2a4a6e;
-    --accent: #00d4ff;
-    --accent2: #7c3aed;
-    --accent3: #10b981;
-    --accent4: #f59e0b;
-    --text: #e2eaf4;
-    --text-muted: #6b8aab;
-    --text-dim: #3d5a7a;
-    --write: #f59e0b;
-    --read: #00d4ff;
-    --mcp: #7c3aed;
-    --db: #10b981;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Animated grid background */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 1300px;
-    margin: 0 auto;
-    padding: 48px 32px;
-  }
-
-  /* Header */
-  .header {
-    text-align: center;
-    margin-bottom: 56px;
-    animation: fadeDown 0.6s ease both;
-  }
-
-  .header-eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.2em;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-bottom: 12px;
-    opacity: 0.8;
-  }
-
-  .header h1 {
-    font-size: clamp(28px, 4vw, 48px);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #e2eaf4 0%, #00d4ff 50%, #7c3aed 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 12px;
-  }
-
-  .header p {
-    font-size: 15px;
-    color: var(--text-muted);
-    max-width: 600px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
-
-  /* Legend */
-  .legend {
-    display: flex;
-    gap: 24px;
-    justify-content: center;
-    margin-bottom: 48px;
-    flex-wrap: wrap;
-    animation: fadeDown 0.6s 0.1s ease both;
-  }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--text-muted);
-    letter-spacing: 0.05em;
-  }
-
-  .legend-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 2px;
-  }
-
-  /* Main diagram grid */
-  .diagram {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: auto auto auto auto;
-    gap: 16px;
-    animation: fadeUp 0.7s 0.2s ease both;
-  }
-
-  /* Cards */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.3s, transform 0.3s;
-  }
-
-  .card:hover {
-    transform: translateY(-2px);
-    border-color: var(--border-bright);
-  }
-
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    border-radius: 12px 12px 0 0;
-  }
-
-  .card.write::before { background: linear-gradient(90deg, var(--write), transparent); }
-  .card.read::before  { background: linear-gradient(90deg, var(--read), transparent); }
-  .card.mcp::before   { background: linear-gradient(90deg, var(--mcp), transparent); }
-  .card.db::before    { background: linear-gradient(90deg, var(--db), transparent); }
-  .card.engine::before { background: linear-gradient(90deg, #e2eaf4, transparent); }
-  .card.source::before { background: linear-gradient(90deg, #f97316, transparent); }
-
-  .card-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    opacity: 0.6;
-  }
-
-  .card.write .card-label { color: var(--write); }
-  .card.read .card-label  { color: var(--read); }
-  .card.mcp .card-label   { color: var(--mcp); }
-  .card.db .card-label    { color: var(--db); }
-  .card.engine .card-label { color: #94a3b8; }
-  .card.source .card-label { color: #f97316; }
-
-  .card-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 6px;
-    letter-spacing: -0.01em;
-  }
-
-  .card-subtitle {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: var(--text-muted);
-    margin-bottom: 14px;
-    line-height: 1.5;
-  }
-
-  .tag-list {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  .tag {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: var(--text-muted);
-    padding: 5px 8px;
-    background: rgba(255,255,255,0.03);
-    border-radius: 5px;
-    border: 1px solid var(--border);
-    line-height: 1.4;
-  }
-
-  .tag-icon {
-    font-size: 11px;
-    flex-shrink: 0;
-  }
-
-  /* Span helpers */
-  .col-span-2 { grid-column: span 2; }
-  .col-span-3 { grid-column: span 3; }
-
-  /* Arrow row */
-  .arrow-row {
-    grid-column: span 3;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    padding: 4px 0;
-  }
-
-  .arrow-group {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-    justify-content: center;
-  }
-
-  .arrow-line {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .arrow-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .arrow-svg {
-    opacity: 0.6;
-  }
-
-  /* Engine card full width */
-  .engine-full {
-    grid-column: span 3;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    gap: 12px;
-    align-items: start;
-  }
-
-  .engine-header {
-    grid-column: span 4;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 4px;
-  }
-
-  .engine-pill {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    padding: 3px 10px;
-    border-radius: 20px;
-    border: 1px solid;
-  }
-
-  .engine-pill.ace {
-    color: #e2eaf4;
-    border-color: rgba(226,234,244,0.3);
-    background: rgba(226,234,244,0.05);
-  }
-
-  .engine-module {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px;
-  }
-
-  .engine-module-title {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 700;
-    color: #e2eaf4;
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .engine-module-items {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .engine-module-item {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    color: var(--text-muted);
-    padding: 2px 0;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .engine-module-item::before {
-    content: '—';
-    color: var(--text-dim);
-    font-size: 8px;
-  }
-
-  /* DB card */
-  .db-full {
-    grid-column: span 3;
-  }
-
-  .db-tables {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-    margin-top: 12px;
-  }
-
-  .db-table {
-    background: rgba(16,185,129,0.05);
-    border: 1px solid rgba(16,185,129,0.2);
-    border-radius: 8px;
-    padding: 12px;
-  }
-
-  .db-table-name {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--db);
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .db-table-col {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    color: var(--text-muted);
-    padding: 2px 0;
-    border-bottom: 1px solid rgba(16,185,129,0.08);
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-  }
-
-  .db-table-col:last-child { border-bottom: none; }
-
-  .col-type { color: var(--text-dim); font-size: 8px; }
-
-  /* COM card */
-  .com-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
-    margin-top: 10px;
-  }
-
-  .com-dim {
-    background: rgba(124,58,237,0.08);
-    border: 1px solid rgba(124,58,237,0.25);
-    border-radius: 6px;
-    padding: 8px 6px;
-    text-align: center;
-  }
-
-  .com-dim-icon { font-size: 14px; margin-bottom: 4px; }
-
-  .com-dim-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 8px;
-    font-weight: 700;
-    color: var(--mcp);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 2px;
-  }
-
-  .com-dim-desc {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 7.5px;
-    color: var(--text-dim);
-  }
-
-  /* Source systems row */
-  .source-row {
-    grid-column: span 3;
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 10px;
-  }
-
-  .source-chip {
-    background: rgba(249,115,22,0.07);
-    border: 1px solid rgba(249,115,22,0.2);
-    border-radius: 8px;
-    padding: 12px;
-    text-align: center;
-  }
-
-  .source-chip-icon { font-size: 18px; margin-bottom: 6px; }
-
-  .source-chip-name {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 700;
-    color: #f97316;
-    margin-bottom: 2px;
-  }
-
-  .source-chip-desc {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 8px;
-    color: var(--text-dim);
-  }
-
-  /* AWS badge */
-  .aws-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    color: #f97316;
-    border: 1px solid rgba(249,115,22,0.3);
-    border-radius: 4px;
-    padding: 2px 7px;
-    margin-left: 8px;
-    vertical-align: middle;
-  }
-
-  /* Flow arrows between sections */
-  .flow-divider {
-    grid-column: span 3;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    padding: 8px 0;
-  }
-
-  .flow-arrow {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .flow-arrow-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-  }
-
-  .flow-line {
-    width: 2px;
-    height: 28px;
-    border-radius: 2px;
-    position: relative;
-  }
-
-  .flow-line::after {
-    content: '▼';
-    position: absolute;
-    bottom: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 10px;
-  }
-
-  .flow-write { background: var(--write); color: var(--write); }
-  .flow-write::after { color: var(--write); }
-  .flow-read  { background: var(--read);  color: var(--read); }
-  .flow-read::after  { color: var(--read); }
-  .flow-both  { background: linear-gradient(var(--write), var(--read)); }
-
-  /* Animations */
-  @keyframes fadeDown {
-    from { opacity: 0; transform: translateY(-16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Pulse dot */
-  .pulse {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-    flex-shrink: 0;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
-  }
-
-  .section-header {
-    grid-column: span 3;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0 4px;
-    margin-top: 4px;
-  }
-
-  .section-header-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-  }
-
-  .section-header-line {
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  @media (max-width: 768px) {
-    .diagram { grid-template-columns: 1fr; }
-    .col-span-2, .col-span-3, .engine-full, .db-full, .source-row, .section-header,
-    .flow-divider, .arrow-row { grid-column: span 1; }
-    .engine-full { grid-template-columns: 1fr 1fr; }
-    .engine-header { grid-column: span 2; }
-    .com-grid { grid-template-columns: repeat(4, 1fr); }
-    .db-tables { grid-template-columns: 1fr; }
-    .source-row { grid-template-columns: 1fr 1fr; }
-  }
+:root {
+  /* From Kartha logo gradient: blue → teal → mint green */
+  --brand-blue: #00A8D6;
+  --brand-teal: #00BFA5;
+  --brand-mint: #00E07A;
+  --brand-grad: linear-gradient(135deg, #00A8D6, #00CCA8, #00E07A);
+
+  /* Pastels derived from brand */
+  --pastel-blue: #E6F7FC;
+  --pastel-teal: #E0F5F0;
+  --pastel-mint: #E2FAF0;
+  --pastel-cyan: #E0F7FA;
+  --pastel-green: #E6F9ED;
+  --pastel-slate: #EDF1F4;
+
+  /* Complementary pastels */
+  --pastel-coral: #FFF0ED;
+  --pastel-lavender: #F0EDFA;
+  --pastel-peach: #FFF6ED;
+
+  /* Accent colors (stronger, for labels/borders) */
+  --accent-blue: #0091B8;
+  --accent-teal: #00A68B;
+  --accent-mint: #00C268;
+  --accent-cyan: #0097A7;
+  --accent-green: #1B9E4B;
+  --accent-slate: #5A7285;
+  --accent-coral: #E8705A;
+  --accent-lavender: #7E6BBE;
+
+  /* Text */
+  --text-primary: #163040;
+  --text-secondary: #3D6070;
+  --text-muted: #7A9AAD;
+  --text-dim: #A8C0CC;
+
+  /* Background */
+  --bg: #F6FAF9;
+  --card-bg: #FFFFFF;
+  --border-light: #D0E8E4;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  font-family: 'Cabinet Grotesk', sans-serif;
+  min-height: 100vh;
+  color: var(--text-primary);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 32px 48px;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  border-bottom: 2px solid var(--text-primary);
+  padding-bottom: 18px;
+}
+
+.header-left h1 {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.header-left h1 span {
+  background: var(--brand-grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-left p {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  letter-spacing: 0.04em;
+  max-width: 520px;
+  line-height: 1.5;
+}
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1.5px solid;
+}
+
+.badge-blue   { color: var(--accent-blue); border-color: var(--accent-blue); background: var(--pastel-blue); }
+.badge-teal   { color: var(--accent-teal); border-color: var(--accent-teal); background: var(--pastel-teal); }
+.badge-mint   { color: var(--accent-mint); border-color: var(--accent-mint); background: var(--pastel-mint); }
+.badge-cyan   { color: var(--accent-cyan); border-color: var(--accent-cyan); background: var(--pastel-cyan); }
+
+.diagram { display: flex; flex-direction: column; gap: 10px; }
+
+/* SECTIONS */
+.section {
+  border: 1.5px solid var(--border-light);
+  border-radius: 10px;
+  background: var(--card-bg);
+  padding: 16px;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-title .dot-marker {
+  width: 10px; height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.section-subtitle {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* Color variants */
+.section.brand-blue  { border-color: #8ED5EC; }
+.section.brand-teal  { border-color: #8EDBC8; }
+.section.brand-mint  { border-color: #8EECC0; }
+.section.brand-cyan  { border-color: #80D8E0; }
+.section.brand-green { border-color: #80D4A0; }
+.section.brand-slate { border-color: #B4C8D4; }
+.section.brand-grad  { border-image: var(--brand-grad) 1; }
+
+/* CHIPS */
+.chip-grid { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.chip {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid;
+  line-height: 1.3;
+}
+
+.chip-blue    { color: var(--accent-blue); border-color: #A8DCF0; background: var(--pastel-blue); }
+.chip-teal    { color: var(--accent-teal); border-color: #A0DCC8; background: var(--pastel-teal); }
+.chip-mint    { color: var(--accent-mint); border-color: #A0E8C0; background: var(--pastel-mint); }
+.chip-cyan    { color: var(--accent-cyan); border-color: #88D4E0; background: var(--pastel-cyan); }
+.chip-green   { color: var(--accent-green); border-color: #90D8A8; background: var(--pastel-green); }
+.chip-slate   { color: var(--accent-slate); border-color: #C0D0DC; background: var(--pastel-slate); }
+
+/* MONO LIST */
+.mono-list { display: flex; flex-direction: column; gap: 4px; }
+
+.mono-item {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.4;
+}
+
+.mono-item .dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+/* FLOW ARROWS */
+.flow-arrow-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  padding: 6px 0;
+}
+
+.flow-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.flow-arrow-line {
+  width: 2px;
+  height: 20px;
+  border-radius: 2px;
+}
+
+.flow-arrow-head { font-size: 10px; line-height: 1; }
+
+.flow-arrow-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* DIVIDER LABEL */
+.divider-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.divider-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-light);
+}
+
+/* PLATFORM GRID */
+.platform-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+/* ENGINE MODULES */
+.engine-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.engine-module {
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 10px;
+  background: var(--pastel-slate);
+}
+
+.engine-module-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.engine-module-item {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  color: var(--text-muted);
+  padding: 1px 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.engine-module-item::before {
+  content: '—';
+  color: var(--text-dim);
+  font-size: 7px;
+}
+
+/* COM STRIP */
+.com-strip {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.com-cell {
+  border: 1px solid #A0DCC8;
+  border-radius: 6px;
+  padding: 8px 4px;
+  text-align: center;
+  background: var(--pastel-teal);
+}
+
+.com-icon { font-size: 14px; }
+.com-key {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--accent-teal);
+  text-transform: uppercase;
+  margin: 3px 0 1px;
+}
+.com-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 7px;
+  color: var(--text-muted);
+}
+
+/* DB */
+.db-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.db-table {
+  border: 1px solid #A0E8C0;
+  border-radius: 6px;
+  padding: 10px;
+  background: var(--pastel-mint);
+}
+
+.db-table-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--accent-mint);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.db-col {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  color: var(--text-secondary);
+  padding: 2px 0;
+  border-bottom: 1px solid #C0ECDA;
+  display: flex;
+  justify-content: space-between;
+}
+.db-col:last-child { border-bottom: none; }
+.db-col .type { color: var(--text-muted); font-size: 7px; }
+
+/* PROJECT FILES */
+.project-files-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.project-file {
+  border: 1px solid #A8DCF0;
+  border-radius: 6px;
+  padding: 10px;
+  background: var(--pastel-blue);
+  text-align: center;
+}
+
+.project-file-icon { font-size: 16px; margin-bottom: 4px; }
+
+.project-file-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--accent-blue);
+}
+
+.project-file-desc {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 7.5px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* TEMPLATES */
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.tmpl-cell {
+  border: 1px solid #88D4E0;
+  border-radius: 6px;
+  padding: 8px 4px;
+  text-align: center;
+  background: var(--pastel-cyan);
+}
+
+.tmpl-cat {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 6.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.tmpl-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  margin-top: 2px;
+}
+
+.tmpl-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 7px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* FOOTER */
+.footer-strip {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  border-top: 2px solid var(--text-primary);
+  padding-top: 16px;
+}
+
+.footer-item { text-align: center; }
+.footer-item-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 8px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+.footer-item-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+@media (max-width: 900px) {
+  .platform-grid { grid-template-columns: 1fr; }
+  .engine-grid { grid-template-columns: 1fr 1fr; }
+  .com-strip { grid-template-columns: repeat(4, 1fr); }
+  .db-grid { grid-template-columns: 1fr; }
+  .template-grid { grid-template-columns: repeat(3, 1fr); }
+  .project-files-grid { grid-template-columns: 1fr 1fr; }
+  .footer-strip { grid-template-columns: repeat(3, 1fr); }
+}
 </style>
 </head>
 <body>
 
 <div class="container">
 
-  <!-- Header -->
   <div class="header">
-    <div class="header-eyebrow">System Architecture</div>
-    <h1>Agent Context Platform</h1>
-    <p>A unified, AI-agent-optimized data store for business entity context — one call returns everything an agent needs to reason and act.</p>
-  </div>
-
-  <!-- Legend -->
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Write Path (Pipelines)</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#00d4ff"></div>Read Path (Agents)</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>MCP Tools</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Database</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>Source Systems</div>
+    <div class="header-left">
+      <h1>Agent Context <span>Platform</span></h1>
+      <p>THREE INTERFACES — CLI, MCP, REST API — ALL ACCESSING THE SAME SCHEMA-AGNOSTIC CONTEXT STORE. TEMPLATES AND VALIDATION LIVE IN THE DEVELOPER'S PROJECT.</p>
+    </div>
+    <div class="header-right">
+      <div class="badge badge-blue">CLI · @kartha/acp-cli</div>
+      <div class="badge badge-cyan">PostgreSQL 16 + pgvector</div>
+      <div class="badge badge-teal">Docker Compose · AWS/GCP</div>
+      <div class="badge badge-mint">MCP · HTTP + stdio</div>
+    </div>
   </div>
 
   <div class="diagram">
 
-    <!-- SOURCE SYSTEMS -->
-    <div class="section-header">
-      <div class="section-header-label" style="color:#f97316">Source Systems</div>
-      <div class="section-header-line"></div>
-    </div>
+    <!-- DEVELOPER PROJECT -->
+    <div class="divider-label">Developer Project</div>
 
-    <div class="source-row">
-      <div class="source-chip">
-        <div class="source-chip-icon">☁️</div>
-        <div class="source-chip-name">Salesforce</div>
-        <div class="source-chip-desc">CRM / Accounts</div>
+    <div class="section brand-blue">
+      <div class="section-title">
+        <div class="dot-marker" style="background:var(--accent-blue)"></div>
+        Developer Project: With their Context
       </div>
-      <div class="source-chip">
-        <div class="source-chip-icon">❄️</div>
-        <div class="source-chip-name">Snowflake</div>
-        <div class="source-chip-desc">Data Warehouse</div>
+      <div class="project-files-grid">
+        <div class="project-file">
+          <div class="project-file-icon">📋</div>
+          <div class="project-file-name">contexts/*.yaml</div>
+          <div class="project-file-desc">Context type definitions<br>copied from standard templates</div>
+        </div>
+        <div class="project-file">
+          <div class="project-file-icon">🔀</div>
+          <div class="project-file-name">pipelines/*.yaml</div>
+          <div class="project-file-desc">Field mappings<br>CSV column → 7-dimension</div>
+        </div>
+        <div class="project-file">
+          <div class="project-file-icon">📊</div>
+          <div class="project-file-name">data/*.csv</div>
+          <div class="project-file-desc">Source data files<br>CSV, JSON, JSONL</div>
+        </div>
+        <div class="project-file">
+          <div class="project-file-icon">⚙️</div>
+          <div class="project-file-name">acp.yaml</div>
+          <div class="project-file-desc">Platform URL, auth<br>connector config</div>
+        </div>
       </div>
-      <div class="source-chip">
-        <div class="source-chip-icon">🗄️</div>
-        <div class="source-chip-name">SQL Databases</div>
-        <div class="source-chip-desc">Ops / Transactional</div>
-      </div>
-      <div class="source-chip">
-        <div class="source-chip-icon">🏢</div>
-        <div class="source-chip-name">SAP</div>
-        <div class="source-chip-desc">ERP / Finance</div>
-      </div>
-      <div class="source-chip">
-        <div class="source-chip-icon">🔶</div>
-        <div class="source-chip-name">Oracle</div>
-        <div class="source-chip-desc">ERP / DB</div>
-      </div>
-      <div class="source-chip">
-        <div class="source-chip-icon">⚙️</div>
-        <div class="source-chip-name">Pipelines</div>
-        <div class="source-chip-desc">Airflow · Glue · Step Fn</div>
+      <div style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text-muted);text-align:center;padding:6px;background:var(--pastel-blue);border-radius:4px;border:1px solid #A8DCF0">
+        Their repo · version controlled · git-tracked · editable · one project per use case · feeds into the running platform
       </div>
     </div>
 
-    <!-- FLOW DOWN -->
-    <div class="flow-divider">
+    <!-- ARROW DOWN -->
+    <div class="flow-arrow-row">
       <div class="flow-arrow">
-        <div class="flow-line flow-write"></div>
-        <div class="flow-arrow-label" style="color:var(--write);margin-top:14px">REST API writes</div>
+        <div class="flow-arrow-line" style="background:var(--accent-blue)"></div>
+        <div class="flow-arrow-head" style="color:var(--accent-blue)">▼</div>
+        <div class="flow-arrow-label" style="color:var(--accent-blue)">CLI validates + POSTs via HTTP</div>
       </div>
-      <div class="flow-arrow" style="margin-left:48px">
-        <div class="flow-line flow-read"></div>
-        <div class="flow-arrow-label" style="color:var(--read);margin-top:14px">MCP tool calls</div>
-      </div>
-    </div>
-
-    <!-- COMPUTE LAYER -->
-    <div class="section-header">
-      <div class="section-header-label" style="color:#94a3b8">Compute Layer <span class="aws-badge">AWS</span></div>
-      <div class="section-header-line"></div>
-    </div>
-
-    <!-- REST API -->
-    <div class="card write">
-      <div class="card-label">Write Path · Lambda</div>
-      <div class="card-title">REST API</div>
-      <div class="card-subtitle">API Gateway + Lambda (ARM64)<br>Scales to zero between pipeline runs</div>
-      <div class="tag-list">
-        <div class="tag"><span class="tag-icon">📥</span>POST /v1/objects — upsert entity</div>
-        <div class="tag"><span class="tag-icon">📦</span>POST /v1/objects/bulk — batch upsert</div>
-        <div class="tag"><span class="tag-icon">📝</span>POST /v1/objects/:id/txns — record event</div>
-        <div class="tag"><span class="tag-icon">🔍</span>GET /v1/objects/:id — fetch entity</div>
-        <div class="tag"><span class="tag-icon">📡</span>GET /v1/objects/changes — changefeed</div>
-        <div class="tag"><span class="tag-icon">💓</span>GET /v1/health</div>
-      </div>
-    </div>
-
-    <!-- MCP SERVER -->
-    <div class="card mcp col-span-2">
-      <div class="card-label">Read + Write Path · ECS Fargate</div>
-      <div class="card-title">MCP Server <span style="font-size:11px;font-weight:400;color:var(--text-muted)">— always warm, no cold starts</span></div>
-      <div class="card-subtitle">ALB → Fargate (persistent Node.js process · warm DB pool · auto-scales 1–4 tasks)</div>
-      <div class="tag-list" style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
-        <div class="tag"><span class="tag-icon">🔎</span><b style="color:var(--mcp)">get_entity</b>&nbsp;— full context profile</div>
-        <div class="tag"><span class="tag-icon">🔍</span><b style="color:var(--mcp)">search_entities</b>&nbsp;— filter / text</div>
-        <div class="tag"><span class="tag-icon">📋</span><b style="color:var(--mcp)">get_transactions</b>&nbsp;— activity history</div>
-        <div class="tag"><span class="tag-icon">📡</span><b style="color:var(--mcp)">get_context_changes</b>&nbsp;— polling</div>
-        <div class="tag" style="grid-column:span 2"><span class="tag-icon">✍️</span><b style="color:var(--mcp)">record_transaction</b>&nbsp;— write back agent decisions to context store</div>
-      </div>
-    </div>
-
-    <!-- FLOW DOWN -->
-    <div class="flow-divider">
       <div class="flow-arrow">
-        <div class="flow-line" style="background:var(--border-bright)"></div>
-        <div class="flow-arrow-label" style="color:var(--text-muted);margin-top:14px">Both paths share</div>
+        <div class="flow-arrow-line" style="background:var(--accent-teal)"></div>
+        <div class="flow-arrow-head" style="color:var(--accent-teal)">▲</div>
+        <div class="flow-arrow-label" style="color:var(--accent-teal)">Agents connect via MCP</div>
       </div>
     </div>
 
-    <!-- CONTEXT ENGINE -->
-    <div class="card engine col-span-3">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <div class="card-label" style="margin-bottom:0">Shared Core</div>
-        <div class="engine-pill ace">Agent Context Engine · @acp/core</div>
+    <!-- PLATFORM -->
+    <div class="divider-label">ACP Platform · Docker Compose (local) · AWS/GCP (prod)</div>
+
+    <div class="platform-grid">
+
+      <!-- CLI -->
+      <div class="section brand-blue">
+        <div class="section-title">
+          <div class="dot-marker" style="background:var(--accent-blue)"></div>
+          CLI &nbsp;<span class="section-subtitle">@kartha/acp-cli</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text-muted);margin-bottom:8px">
+          Pure HTTP client — talks to REST API<br>No @acp/core · no direct DB access
+        </div>
+        <div class="mono-list">
+          <div class="mono-item"><div class="dot" style="background:var(--accent-blue)"></div><b>acp init</b> — create project</div>
+          <div class="mono-item"><div class="dot" style="background:var(--accent-blue)"></div><b>acp ctx define</b> — add type</div>
+          <div class="mono-item"><div class="dot" style="background:var(--accent-blue)"></div><b>acp connect add</b> — map data</div>
+          <div class="mono-item"><div class="dot" style="background:var(--accent-blue)"></div><b>acp connect sync</b> — load data</div>
+          <div class="mono-item"><div class="dot" style="background:var(--brand-teal)"></div><b>acp ctx get</b> — entity profile</div>
+          <div class="mono-item"><div class="dot" style="background:var(--brand-teal)"></div><b>acp ctx search</b> — find entities</div>
+          <div class="mono-item"><div class="dot" style="background:var(--brand-teal)"></div><b>acp txn list</b> — transactions</div>
+          <div class="mono-item"><div class="dot" style="background:var(--brand-teal)"></div><b>acp txn add</b> — record event</div>
+          <div class="mono-item"><div class="dot" style="background:var(--brand-teal)"></div><b>acp changes</b> — changefeed</div>
+        </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px">
+
+      <!-- REST API -->
+      <div class="section brand-cyan">
+        <div class="section-title">
+          <div class="dot-marker" style="background:var(--accent-cyan)"></div>
+          REST API :3002 &nbsp;<span class="section-subtitle">schema-agnostic</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text-muted);margin-bottom:8px">
+          Uses @acp/core · direct DB access<br>Accepts any JSONB — no template validation
+        </div>
+        <div class="chip-grid">
+          <div class="chip chip-cyan">POST /v1/objects</div>
+          <div class="chip chip-cyan">POST /v1/objects/bulk</div>
+          <div class="chip chip-cyan">POST /:id/txns</div>
+          <div class="chip chip-cyan">GET /v1/objects/search</div>
+          <div class="chip chip-cyan">GET /v1/objects/stats</div>
+          <div class="chip chip-cyan">GET /v1/objects/:id</div>
+          <div class="chip chip-cyan">GET /:id/txns</div>
+          <div class="chip chip-cyan">GET /v1/objects/changes</div>
+          <div class="chip chip-cyan">GET /v1/health</div>
+        </div>
+      </div>
+
+      <!-- MCP SERVER -->
+      <div class="section brand-teal">
+        <div class="section-title">
+          <div class="dot-marker" style="background:var(--accent-teal)"></div>
+          MCP Server :3001 &nbsp;<span class="section-subtitle">HTTP + stdio</span>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text-muted);margin-bottom:8px">
+          Uses @acp/core · direct DB access<br>Streamable HTTP + stdio (Claude Desktop)
+        </div>
+        <div class="chip-grid">
+          <div class="chip chip-teal">🔎 get_entity</div>
+          <div class="chip chip-teal">🔍 search_entities</div>
+          <div class="chip chip-teal">📋 get_transactions</div>
+          <div class="chip chip-teal">📡 get_context_changes</div>
+          <div class="chip chip-teal">✍️ record_transaction</div>
+        </div>
+        <div style="margin-top:8px">
+          <div class="mono-list">
+            <div class="mono-item"><div class="dot" style="background:var(--accent-teal)"></div>Claude Desktop · Cursor</div>
+            <div class="mono-item"><div class="dot" style="background:var(--accent-teal)"></div>CrewAI · LangGraph</div>
+            <div class="mono-item"><div class="dot" style="background:var(--accent-teal)"></div>Any MCP client</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ARROW DOWN -->
+    <div class="flow-arrow-row">
+      <div class="flow-arrow">
+        <div class="flow-arrow-line" style="background:var(--accent-slate)"></div>
+        <div class="flow-arrow-head" style="color:var(--accent-slate)">▼</div>
+        <div class="flow-arrow-label" style="color:var(--accent-slate)">REST API + MCP both import @acp/core</div>
+      </div>
+    </div>
+
+    <!-- @acp/core -->
+    <div class="section brand-slate">
+      <div class="section-title">
+        <div class="dot-marker" style="background:var(--accent-slate)"></div>
+        @acp/core &nbsp;<span class="section-subtitle">shared library · imported by REST API + MCP Server · direct DB</span>
+      </div>
+      <div class="engine-grid">
         <div class="engine-module">
           <div class="engine-module-title">🔀 Deep Merge</div>
-          <div class="engine-module-items">
-            <div class="engine-module-item">Recursive JSONB merge</div>
-            <div class="engine-module-item">Preserves missing keys</div>
-            <div class="engine-module-item">Arrays replaced not appended</div>
-            <div class="engine-module-item">null = delete field</div>
-          </div>
+          <div class="engine-module-item">Recursive JSONB merge</div>
+          <div class="engine-module-item">Preserves missing keys</div>
+          <div class="engine-module-item">Arrays replaced</div>
+          <div class="engine-module-item">null = delete field</div>
         </div>
         <div class="engine-module">
           <div class="engine-module-title">📊 Change Detection</div>
-          <div class="engine-module-items">
-            <div class="engine-module-item">Diffs old vs new context</div>
-            <div class="engine-module-item">Field path + old/new values</div>
-            <div class="engine-module-item">Writes to change_log</div>
-            <div class="engine-module-item">Powers changefeed polling</div>
-          </div>
+          <div class="engine-module-item">Diffs old vs new context</div>
+          <div class="engine-module-item">Field path + old/new</div>
+          <div class="engine-module-item">Writes to change_log</div>
+          <div class="engine-module-item">Powers changefeed</div>
         </div>
         <div class="engine-module">
           <div class="engine-module-title">📸 Snapshot</div>
-          <div class="engine-module-items">
-            <div class="engine-module-item">Context snapshot on change</div>
-            <div class="engine-module-item">Embeds measures + temporals</div>
-            <div class="engine-module-item">Agents reason without re-fetch</div>
-            <div class="engine-module-item">Cursor-based pagination</div>
-          </div>
+          <div class="engine-module-item">Context snapshot on change</div>
+          <div class="engine-module-item">Embeds measures + temporals</div>
+          <div class="engine-module-item">Agents reason w/o re-fetch</div>
+          <div class="engine-module-item">Cursor-based pagination</div>
         </div>
         <div class="engine-module">
-          <div class="engine-module-title">✅ Validator</div>
-          <div class="engine-module-items">
-            <div class="engine-module-item">AJV JSON Schema (templates)</div>
-            <div class="engine-module-item">Zod (API request bodies)</div>
-            <div class="engine-module-item">Freeform mode if no template</div>
-            <div class="engine-module-item">Typed error classes</div>
-          </div>
+          <div class="engine-module-title">🗄️ Repositories</div>
+          <div class="engine-module-item">context-object.repo.ts</div>
+          <div class="engine-module-item">transaction.repo.ts</div>
+          <div class="engine-module-item">change-log.repo.ts</div>
+          <div class="engine-module-item">pg.Pool connection pool</div>
         </div>
       </div>
     </div>
 
-    <!-- CONTEXT OBJECT MODEL -->
-    <div class="card mcp col-span-3">
-      <div class="card-label">Context Object Model — The "Facebook Profile" Pattern</div>
-      <div class="card-title" style="margin-bottom:4px">Uniform Context Schema — every entity, every type</div>
-      <div class="card-subtitle">Pre-joined, denormalized profile documents. Pipelines enrich once — agents call once and get everything.</div>
-      <div class="com-grid">
-        <div class="com-dim">
-          <div class="com-dim-icon">🏷️</div>
-          <div class="com-dim-label">attributes</div>
-          <div class="com-dim-desc">WHAT — identity facts</div>
-        </div>
-        <div class="com-dim">
-          <div class="com-dim-icon">📈</div>
-          <div class="com-dim-label">measures</div>
-          <div class="com-dim-desc">HOW MUCH — KPIs & ARR</div>
-        </div>
-        <div class="com-dim">
-          <div class="com-dim-icon">👥</div>
-          <div class="com-dim-label">actors</div>
-          <div class="com-dim-desc">WHO — people & roles</div>
-        </div>
-        <div class="com-dim">
-          <div class="com-dim-icon">📅</div>
-          <div class="com-dim-label">temporals</div>
-          <div class="com-dim-desc">WHEN — dates & milestones</div>
-        </div>
-        <div class="com-dim">
-          <div class="com-dim-icon">📍</div>
-          <div class="com-dim-label">locations</div>
-          <div class="com-dim-desc">WHERE — geo & territory</div>
-        </div>
-        <div class="com-dim">
-          <div class="com-dim-icon">🎯</div>
-          <div class="com-dim-label">intents</div>
-          <div class="com-dim-desc">WHY — strategy & risk</div>
-        </div>
-        <div class="com-dim">
-          <div class="com-dim-icon">⚙️</div>
-          <div class="com-dim-label">processes</div>
-          <div class="com-dim-desc">HOW — stage & workflow</div>
-        </div>
+    <!-- 7-DIMENSION SCHEMA -->
+    <div class="section brand-teal">
+      <div class="section-title">
+        <div class="dot-marker" style="background:var(--accent-teal)"></div>
+        7-Dimension Schema &nbsp;<span class="section-subtitle">every entity follows this shape — the "Facebook profile" pattern</span>
+      </div>
+      <div class="com-strip">
+        <div class="com-cell"><div class="com-icon">🏷️</div><div class="com-key">attributes</div><div class="com-val">WHAT</div></div>
+        <div class="com-cell"><div class="com-icon">📈</div><div class="com-key">measures</div><div class="com-val">HOW MUCH</div></div>
+        <div class="com-cell"><div class="com-icon">👥</div><div class="com-key">actors</div><div class="com-val">WHO</div></div>
+        <div class="com-cell"><div class="com-icon">📅</div><div class="com-key">temporals</div><div class="com-val">WHEN</div></div>
+        <div class="com-cell"><div class="com-icon">📍</div><div class="com-key">locations</div><div class="com-val">WHERE</div></div>
+        <div class="com-cell"><div class="com-icon">🎯</div><div class="com-key">intents</div><div class="com-val">WHY</div></div>
+        <div class="com-cell"><div class="com-icon">⚙️</div><div class="com-key">processes</div><div class="com-val">HOW</div></div>
       </div>
     </div>
 
-    <!-- FLOW DOWN -->
-    <div class="flow-divider">
+    <!-- ARROW DOWN -->
+    <div class="flow-arrow-row">
       <div class="flow-arrow">
-        <div class="flow-line" style="background:var(--db)"></div>
-        <div class="flow-arrow-label" style="color:var(--db);margin-top:14px">persisted to</div>
+        <div class="flow-arrow-line" style="background:var(--accent-mint)"></div>
+        <div class="flow-arrow-head" style="color:var(--accent-mint)">▼</div>
+        <div class="flow-arrow-label" style="color:var(--accent-mint)">persisted to</div>
       </div>
     </div>
 
     <!-- DATABASE -->
-    <div class="card db col-span-3">
-      <div class="card-label">Data Layer · RDS PostgreSQL 16</div>
-      <div class="card-title">PostgreSQL + pgvector + pg_trgm <span style="font-size:11px;font-weight:400;color:var(--text-muted)">— private subnet, never publicly accessible</span></div>
-      <div class="db-tables">
+    <div class="section brand-green">
+      <div class="section-title">
+        <div class="dot-marker" style="background:var(--accent-green)"></div>
+        PostgreSQL 16 &nbsp;<span class="section-subtitle">pgvector + pg_trgm · Docker (local) · RDS / Cloud SQL (prod) · schema-agnostic JSONB</span>
+      </div>
+      <div class="db-grid">
         <div class="db-table">
           <div class="db-table-name">🗂️ context_objects</div>
-          <div class="db-table-col"><span>object_id</span><span class="col-type">UUID PK</span></div>
-          <div class="db-table-col"><span>object_type / subtype</span><span class="col-type">TEXT</span></div>
-          <div class="db-table-col"><span>canonical_name</span><span class="col-type">TEXT · gin_trgm</span></div>
-          <div class="db-table-col"><span>context</span><span class="col-type">JSONB · GIN</span></div>
-          <div class="db-table-col"><span>embedding</span><span class="col-type">vector(1536)</span></div>
-          <div class="db-table-col"><span>source_refs</span><span class="col-type">JSONB</span></div>
-          <div class="db-table-col"><span>confidence</span><span class="col-type">FLOAT</span></div>
+          <div class="db-col"><span>object_id</span><span class="type">UUID PK</span></div>
+          <div class="db-col"><span>object_type / subtype</span><span class="type">TEXT</span></div>
+          <div class="db-col"><span>canonical_name</span><span class="type">TEXT · gin_trgm</span></div>
+          <div class="db-col"><span>context</span><span class="type">JSONB · GIN</span></div>
+          <div class="db-col"><span>embedding</span><span class="type">vector(1536)</span></div>
+          <div class="db-col"><span>source_refs</span><span class="type">JSONB</span></div>
         </div>
         <div class="db-table">
           <div class="db-table-name">⚡ context_transactions</div>
-          <div class="db-table-col"><span>transaction_id</span><span class="col-type">UUID PK</span></div>
-          <div class="db-table-col"><span>object_id</span><span class="col-type">FK → objects</span></div>
-          <div class="db-table-col"><span>transaction_type</span><span class="col-type">TEXT</span></div>
-          <div class="db-table-col"><span>occurred_at</span><span class="col-type">TIMESTAMPTZ</span></div>
-          <div class="db-table-col"><span>context</span><span class="col-type">JSONB</span></div>
-          <div class="db-table-col"><span>actors</span><span class="col-type">JSONB</span></div>
-          <div class="db-table-col"><span>measures</span><span class="col-type">JSONB</span></div>
+          <div class="db-col"><span>transaction_id</span><span class="type">UUID PK</span></div>
+          <div class="db-col"><span>object_id</span><span class="type">FK → objects</span></div>
+          <div class="db-col"><span>transaction_type</span><span class="type">TEXT</span></div>
+          <div class="db-col"><span>occurred_at</span><span class="type">TIMESTAMPTZ</span></div>
+          <div class="db-col"><span>context / actors / measures</span><span class="type">JSONB</span></div>
         </div>
         <div class="db-table">
           <div class="db-table-name">📡 change_log</div>
-          <div class="db-table-col"><span>change_id</span><span class="col-type">UUID PK</span></div>
-          <div class="db-table-col"><span>object_id</span><span class="col-type">UUID</span></div>
-          <div class="db-table-col"><span>change_type</span><span class="col-type">TEXT</span></div>
-          <div class="db-table-col"><span>changes</span><span class="col-type">JSONB · diff</span></div>
-          <div class="db-table-col"><span>context_snapshot</span><span class="col-type">JSONB</span></div>
-          <div class="db-table-col"><span>changed_at</span><span class="col-type">TIMESTAMPTZ · IDX</span></div>
-          <div class="db-table-col"><span>— powers changefeed —</span><span class="col-type">polling</span></div>
+          <div class="db-col"><span>change_id</span><span class="type">UUID PK</span></div>
+          <div class="db-col"><span>change_type</span><span class="type">TEXT</span></div>
+          <div class="db-col"><span>changes</span><span class="type">JSONB · diff</span></div>
+          <div class="db-col"><span>context_snapshot</span><span class="type">JSONB</span></div>
+          <div class="db-col"><span>changed_at ↓ IDX</span><span class="type">changefeed</span></div>
         </div>
       </div>
     </div>
 
-    <!-- TEMPLATES ROW -->
-    <div class="section-header" style="margin-top:8px">
-      <div class="section-header-label" style="color:var(--mcp)">Pre-Built CRM Templates</div>
-      <div class="section-header-line"></div>
-    </div>
+    <!-- TEMPLATES -->
+    <div class="divider-label">Standard Templates · YAML · Bundled in CLI · Copied to Developer Project</div>
 
-    <div class="card mcp">
-      <div class="card-label">Template</div>
-      <div class="card-title">crm-customer</div>
-      <div class="tag-list">
-        <div class="tag">case_opened / case_closed</div>
-        <div class="tag">qbr_completed · renewal_initiated</div>
-        <div class="tag">risk_assessed · nps_received</div>
-        <div class="tag">health_score_updated · churn_warning</div>
+    <div class="section brand-cyan">
+      <div class="section-title">
+        <div class="dot-marker" style="background:var(--accent-cyan)"></div>
+        10 Standard Context Types &nbsp;<span class="section-subtitle">developer picks with `acp init` · edits in their project · CLI validates before sync</span>
+      </div>
+      <div class="template-grid">
+        <div class="tmpl-cell"><div class="tmpl-cat">CRM</div><div class="tmpl-name">customer</div><div class="tmpl-count">32 fields · 12 txn types</div></div>
+        <div class="tmpl-cell"><div class="tmpl-cat">CRM</div><div class="tmpl-name">contact</div><div class="tmpl-count">19 fields · 6 txn types</div></div>
+        <div class="tmpl-cell"><div class="tmpl-cat">CRM</div><div class="tmpl-name">opportunity</div><div class="tmpl-count">19 fields · 9 txn types</div></div>
+        <div class="tmpl-cell"><div class="tmpl-cat">CRM</div><div class="tmpl-name">case</div><div class="tmpl-count">16 fields · 9 txn types</div></div>
+        <div class="tmpl-cell"><div class="tmpl-cat">CRM</div><div class="tmpl-name">vendor</div><div class="tmpl-count">23 fields · 7 txn types</div></div>
+        <div class="tmpl-cell"><div class="tmpl-cat">Finance</div><div class="tmpl-name">invoice</div><div class="tmpl-count">22 fields · 8 txn types</div></div>
+        <div class="tmpl-cell"><div class="tmpl-cat">Legal</div><div class="tmpl-name">contract</div><div class="tmpl-count">19 fields · 8 txn types</div></div>
+        <div class="tmpl-cell"><div class="tmpl-cat">Logistics</div><div class="tmpl-name">shipment</div><div class="tmpl-count">18 fields · 8 txn types</div></div>
+        <div class="tmpl-cell"><div class="tmpl-cat">Commerce</div><div class="tmpl-name">product</div><div class="tmpl-count">21 fields · 8 txn types</div></div>
+        <div class="tmpl-cell"><div class="tmpl-cat">HR</div><div class="tmpl-name">employee</div><div class="tmpl-count">20 fields · 10 txn types</div></div>
       </div>
     </div>
 
-    <div class="card mcp">
-      <div class="card-label">Template</div>
-      <div class="card-title">crm-contact</div>
-      <div class="tag-list">
-        <div class="tag">meeting_held · email_sent</div>
-        <div class="tag">call_completed · email_received</div>
-        <div class="tag">sentiment_assessed</div>
-        <div class="tag">role_changed</div>
-      </div>
-    </div>
+  </div>
 
-    <div class="card mcp">
-      <div class="card-label">Templates</div>
-      <div class="card-title">crm-opportunity · crm-case</div>
-      <div class="tag-list">
-        <div class="tag">stage_changed · deal_won / deal_lost</div>
-        <div class="tag">proposal_sent · risk_flagged</div>
-        <div class="tag">case_created · escalated · resolved</div>
-        <div class="tag">sla_breached · csat_received</div>
-      </div>
-    </div>
+  <div class="footer-strip">
+    <div class="footer-item"><div class="footer-item-label">Language</div><div class="footer-item-value">TypeScript strict</div></div>
+    <div class="footer-item"><div class="footer-item-label">Monorepo</div><div class="footer-item-value">pnpm workspaces</div></div>
+    <div class="footer-item"><div class="footer-item-label">Local</div><div class="footer-item-value">Docker Compose</div></div>
+    <div class="footer-item"><div class="footer-item-label">Production</div><div class="footer-item-value">AWS/GCP</div></div>
+    <div class="footer-item"><div class="footer-item-label">MCP</div><div class="footer-item-value">HTTP + stdio</div></div>
+    <div class="footer-item"><div class="footer-item-label">CLI</div><div class="footer-item-value">@kartha/acp-cli</div></div>
+  </div>
 
-  </div><!-- end .diagram -->
-
-</div><!-- end .container -->
+</div>
 
 </body>
 </html>
