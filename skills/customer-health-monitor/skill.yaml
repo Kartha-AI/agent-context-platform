@@ -1,0 +1,34 @@
+name: customer-health-monitor
+description: "Monitors customer health scores and creates risk assessments when indicators decline"
+version: "1.0"
+category: revenue-operations
+
+requires:
+  - customer
+optional:
+  - case
+  - contact
+
+operations:
+  - get_context_changes
+  - get_entity
+  - search_entities
+  - record_transaction
+
+trigger:
+  recommended: schedule
+  interval: 6h
+  description: "Run every 6 hours to catch health score changes, or manually during account reviews"
+
+outputs:
+  transaction_type: risk_assessed
+  context_fields:
+    - risk_level
+    - score
+    - factors
+    - recommended_actions
+    - urgency
+
+apqc:
+  category: "3. Market and Sell Products and Services"
+  process: "3.3.4 Manage Customer Health"

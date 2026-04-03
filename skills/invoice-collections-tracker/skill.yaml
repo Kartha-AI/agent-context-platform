@@ -1,0 +1,32 @@
+name: invoice-collections-tracker
+description: "Identifies overdue invoices, groups by customer, cross-references business context, and recommends collection actions by aging bracket"
+version: "1.0"
+category: financial-operations
+
+requires:
+  - invoice
+optional:
+  - customer
+
+operations:
+  - search_entities
+  - get_entity
+  - record_transaction
+
+trigger:
+  recommended: schedule
+  interval: daily
+  description: "Run daily in the morning, or before AR review meetings"
+
+outputs:
+  transaction_type: overdue_assessed
+  context_fields:
+    - aging_bracket
+    - days_overdue
+    - recommended_action
+    - notes
+    - customer_context
+
+apqc:
+  category: "8. Manage Financial Resources"
+  process: "8.3.4 Manage Collections"

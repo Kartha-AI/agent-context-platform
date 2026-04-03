@@ -1,0 +1,33 @@
+name: pipeline-risk-assessment
+description: "Reviews open sales opportunities, identifies stalled or at-risk deals, and produces prioritized action recommendations"
+version: "1.0"
+category: revenue-operations
+
+requires:
+  - opportunity
+optional:
+  - customer
+  - contact
+
+operations:
+  - search_entities
+  - get_entity
+  - get_transactions
+  - record_transaction
+
+trigger:
+  recommended: schedule
+  interval: daily
+  description: "Run daily in the morning, or before weekly pipeline review meetings"
+
+outputs:
+  transaction_type: deal_risk_assessed
+  context_fields:
+    - risk_level
+    - risk_signals
+    - recommended_actions
+    - deal_summary
+
+apqc:
+  category: "3. Market and Sell Products and Services"
+  process: "3.2.5 Manage Sales Pipeline"
