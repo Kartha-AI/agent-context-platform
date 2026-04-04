@@ -8,7 +8,16 @@ import {
 export const recordTransactionTool = {
   name: 'record_transaction',
   description:
-    'Record an event or decision for an entity. Use when your agent has assessed, decided, or taken action on an entity and wants to record this for other agents to see.',
+    `Record an event or decision for an entity. Use when you have assessed, decided, or taken action on an entity and want to record it so other agents and users can see it.
+
+Common transaction types:
+- risk_assessed: you evaluated an entity's risk level
+- deal_risk_assessed: you reviewed a sales opportunity
+- overdue_assessed: you flagged an overdue invoice
+- escalation_assessed: you evaluated a case for escalation
+- vendor_review: you scored a vendor's performance
+
+Include structured context (your assessment), actors (who/what made the decision), and measures (relevant numbers). These transactions appear in the changefeed — other polling agents will discover them and can act on your findings.`,
   inputSchema: {
     type: 'object' as const,
     required: ['objectId', 'transactionType', 'context'],
