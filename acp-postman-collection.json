@@ -1,0 +1,423 @@
+{
+  "info": {
+    "name": "ACP - Agent Context Platform",
+    "description": "Complete API collection for the Agent Context Platform.\n\nREST API runs on port 3002, MCP Server on port 3001.\n\nStart with: docker compose up -d",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "api_url", "value": "http://localhost:3002" },
+    { "key": "mcp_url", "value": "http://localhost:3001" },
+    { "key": "api_key", "value": "dev-key" },
+    { "key": "object_id", "value": "" },
+    { "key": "mcp_session_id", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{api_key}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "REST API",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{api_url}}/v1/health",
+            "auth": { "type": "noauth" }
+          }
+        },
+        {
+          "name": "Upsert Object",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.objectId) {",
+                  "  pm.collectionVariables.set('object_id', json.objectId);",
+                  "  console.log('Saved object_id: ' + json.objectId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{api_url}}/v1/objects",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"objectType\": \"entity\",\n  \"subtype\": \"customer\",\n  \"canonicalName\": \"Test Corp\",\n  \"context\": {\n    \"attributes\": { \"name\": \"Test Corp\", \"industry\": \"Technology\", \"segment\": \"enterprise\", \"status\": \"active\" },\n    \"measures\": { \"arr\": 250000, \"mrr\": 20833, \"health_score\": 72, \"nps\": 38, \"open_cases\": 2 },\n    \"actors\": { \"owner\": \"Jane Smith\", \"primary_contact\": \"Bob Johnson\", \"primary_contact_email\": \"bob@testcorp.com\" },\n    \"temporals\": { \"customer_since\": \"2024-01-15\", \"renewal_date\": \"2026-12-01\", \"last_qbr\": \"2026-03-15\" },\n    \"locations\": { \"headquarters\": \"San Francisco CA\", \"region\": \"West\", \"country\": \"US\" },\n    \"intents\": { \"churn_risk\": \"low\", \"expansion_potential\": \"Product expansion discussed\" },\n    \"processes\": { \"onboarding_status\": \"completed\", \"support_tier\": \"premium\" }\n  },\n  \"sourceRefs\": [{ \"system\": \"salesforce\", \"id\": \"ACC-001\" }]\n}"
+            }
+          }
+        },
+        {
+          "name": "Bulk Upsert",
+          "request": {
+            "method": "POST",
+            "url": "{{api_url}}/v1/objects/bulk",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"objects\": [\n    {\n      \"objectType\": \"entity\",\n      \"subtype\": \"customer\",\n      \"canonicalName\": \"Alpha Inc\",\n      \"context\": {\n        \"attributes\": { \"name\": \"Alpha Inc\", \"industry\": \"Finance\", \"status\": \"active\" },\n        \"measures\": { \"arr\": 100000, \"health_score\": 85 },\n        \"actors\": { \"owner\": \"Sarah Chen\" }\n      },\n      \"sourceRefs\": [{ \"system\": \"test\", \"id\": \"T002\" }]\n    },\n    {\n      \"objectType\": \"entity\",\n      \"subtype\": \"customer\",\n      \"canonicalName\": \"Beta LLC\",\n      \"context\": {\n        \"attributes\": { \"name\": \"Beta LLC\", \"industry\": \"Healthcare\", \"status\": \"active\" },\n        \"measures\": { \"arr\": 50000, \"health_score\": 42 },\n        \"actors\": { \"owner\": \"David Park\" }\n      },\n      \"sourceRefs\": [{ \"system\": \"test\", \"id\": \"T003\" }]\n    }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Object by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{api_url}}/v1/objects/{{object_id}}"
+          }
+        },
+        {
+          "name": "Get Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{api_url}}/v1/objects/stats"
+          }
+        },
+        {
+          "name": "Search - by type",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/v1/objects/search?type=customer&limit=10",
+              "host": ["{{api_url}}"],
+              "path": ["v1", "objects", "search"],
+              "query": [
+                { "key": "type", "value": "customer" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search - by text query",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/v1/objects/search?type=customer&query=Test",
+              "host": ["{{api_url}}"],
+              "path": ["v1", "objects", "search"],
+              "query": [
+                { "key": "type", "value": "customer" },
+                { "key": "query", "value": "Test" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search - with JSONB filter",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/v1/objects/search?type=customer&filters={\"context.measures.arr\":{\"gt\":100000}}",
+              "host": ["{{api_url}}"],
+              "path": ["v1", "objects", "search"],
+              "query": [
+                { "key": "type", "value": "customer" },
+                { "key": "filters", "value": "{\"context.measures.arr\":{\"gt\":100000}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search - with multiple filters",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/v1/objects/search?type=customer&filters={\"context.measures.health_score\":{\"lt\":50},\"context.attributes.status\":{\"eq\":\"active\"}}",
+              "host": ["{{api_url}}"],
+              "path": ["v1", "objects", "search"],
+              "query": [
+                { "key": "type", "value": "customer" },
+                { "key": "filters", "value": "{\"context.measures.health_score\":{\"lt\":50},\"context.attributes.status\":{\"eq\":\"active\"}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Record Transaction",
+          "request": {
+            "method": "POST",
+            "url": "{{api_url}}/v1/objects/{{object_id}}/txns",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionType\": \"risk_assessed\",\n  \"context\": {\n    \"risk_level\": \"medium\",\n    \"score\": 65,\n    \"factors\": [\"Health score declining\", \"2 open support cases\"],\n    \"recommended_actions\": [\"Schedule QBR within 2 weeks\", \"Review open cases\"]\n  },\n  \"actors\": { \"agent\": \"manual-test\", \"account_owner\": \"Jane Smith\" },\n  \"measures\": { \"previous_health_score\": 72, \"current_health_score\": 65 }\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Entity Transactions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/v1/objects/{{object_id}}/txns?limit=10",
+              "host": ["{{api_url}}"],
+              "path": ["v1", "objects", "{{object_id}}", "txns"],
+              "query": [
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Transactions - cross entity",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/v1/objects/txns?types=risk_assessed&limit=20",
+              "host": ["{{api_url}}"],
+              "path": ["v1", "objects", "txns"],
+              "query": [
+                { "key": "types", "value": "risk_assessed" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Transactions - with date range",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/v1/objects/txns?since=2026-01-01T00:00:00Z&until=2026-12-31T23:59:59Z&limit=50",
+              "host": ["{{api_url}}"],
+              "path": ["v1", "objects", "txns"],
+              "query": [
+                { "key": "since", "value": "2026-01-01T00:00:00Z" },
+                { "key": "until", "value": "2026-12-31T23:59:59Z" },
+                { "key": "limit", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Changefeed",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/v1/objects/changes?since=2026-01-01T00:00:00Z&limit=50",
+              "host": ["{{api_url}}"],
+              "path": ["v1", "objects", "changes"],
+              "query": [
+                { "key": "since", "value": "2026-01-01T00:00:00Z" },
+                { "key": "limit", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Changefeed - filtered by type",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{api_url}}/v1/objects/changes?since=2026-01-01T00:00:00Z&types=customer&limit=20",
+              "host": ["{{api_url}}"],
+              "path": ["v1", "objects", "changes"],
+              "query": [
+                { "key": "since", "value": "2026-01-01T00:00:00Z" },
+                { "key": "types", "value": "customer" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upsert - partial update (deep merge)",
+          "request": {
+            "method": "POST",
+            "url": "{{api_url}}/v1/objects",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"objectType\": \"entity\",\n  \"subtype\": \"customer\",\n  \"canonicalName\": \"Test Corp\",\n  \"context\": {\n    \"measures\": { \"health_score\": 58, \"open_cases\": 4 },\n    \"intents\": { \"churn_risk\": \"high\" }\n  },\n  \"sourceRefs\": [{ \"system\": \"salesforce\", \"id\": \"ACC-001\" }]\n}"
+            },
+            "description": "Updates only measures and intents. Other dimensions (attributes, actors, temporals, etc.) are preserved via deep merge."
+          }
+        }
+      ]
+    },
+    {
+      "name": "MCP Server",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{mcp_url}}/health",
+            "auth": { "type": "noauth" }
+          }
+        },
+        {
+          "name": "1. Initialize Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var sessionId = pm.response.headers.get('mcp-session-id');",
+                  "if (sessionId) {",
+                  "  pm.collectionVariables.set('mcp_session_id', sessionId);",
+                  "  console.log('Saved mcp_session_id: ' + sessionId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{mcp_url}}/mcp",
+            "auth": { "type": "noauth" },
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json, text/event-stream" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 1,\n  \"method\": \"initialize\",\n  \"params\": {\n    \"protocolVersion\": \"2025-03-26\",\n    \"capabilities\": {},\n    \"clientInfo\": { \"name\": \"postman-test\", \"version\": \"1.0\" }\n  }\n}"
+            },
+            "description": "Initialize an MCP session. The session ID is returned in the mcp-session-id response header and auto-saved for subsequent requests."
+          }
+        },
+        {
+          "name": "2. List Tools",
+          "request": {
+            "method": "POST",
+            "url": "{{mcp_url}}/mcp",
+            "auth": { "type": "noauth" },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/event-stream" },
+              { "key": "mcp-session-id", "value": "{{mcp_session_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 2,\n  \"method\": \"tools/list\",\n  \"params\": {}\n}"
+            }
+          }
+        },
+        {
+          "name": "3. get_entity - by name",
+          "request": {
+            "method": "POST",
+            "url": "{{mcp_url}}/mcp",
+            "auth": { "type": "noauth" },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/event-stream" },
+              { "key": "mcp-session-id", "value": "{{mcp_session_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 3,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"get_entity\",\n    \"arguments\": { \"type\": \"customer\", \"name\": \"Test Corp\" }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "3. get_entity - by ID",
+          "request": {
+            "method": "POST",
+            "url": "{{mcp_url}}/mcp",
+            "auth": { "type": "noauth" },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/event-stream" },
+              { "key": "mcp-session-id", "value": "{{mcp_session_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 3,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"get_entity\",\n    \"arguments\": { \"id\": \"{{object_id}}\" }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "4. search_entities",
+          "request": {
+            "method": "POST",
+            "url": "{{mcp_url}}/mcp",
+            "auth": { "type": "noauth" },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/event-stream" },
+              { "key": "mcp-session-id", "value": "{{mcp_session_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 4,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"search_entities\",\n    \"arguments\": { \"type\": \"customer\", \"limit\": 10 }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "4. search_entities - with filters",
+          "request": {
+            "method": "POST",
+            "url": "{{mcp_url}}/mcp",
+            "auth": { "type": "noauth" },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/event-stream" },
+              { "key": "mcp-session-id", "value": "{{mcp_session_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 4,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"search_entities\",\n    \"arguments\": {\n      \"type\": \"customer\",\n      \"filters\": { \"context.measures.health_score\": { \"lt\": 50 } },\n      \"limit\": 10\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "5. get_transactions",
+          "request": {
+            "method": "POST",
+            "url": "{{mcp_url}}/mcp",
+            "auth": { "type": "noauth" },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/event-stream" },
+              { "key": "mcp-session-id", "value": "{{mcp_session_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 5,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"get_transactions\",\n    \"arguments\": { \"objectId\": \"{{object_id}}\", \"limit\": 10 }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "6. get_context_changes",
+          "request": {
+            "method": "POST",
+            "url": "{{mcp_url}}/mcp",
+            "auth": { "type": "noauth" },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/event-stream" },
+              { "key": "mcp-session-id", "value": "{{mcp_session_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 6,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"get_context_changes\",\n    \"arguments\": { \"since\": \"2026-01-01T00:00:00Z\", \"limit\": 20 }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "7. record_transaction",
+          "request": {
+            "method": "POST",
+            "url": "{{mcp_url}}/mcp",
+            "auth": { "type": "noauth" },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/event-stream" },
+              { "key": "mcp-session-id", "value": "{{mcp_session_id}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jsonrpc\": \"2.0\",\n  \"id\": 7,\n  \"method\": \"tools/call\",\n  \"params\": {\n    \"name\": \"record_transaction\",\n    \"arguments\": {\n      \"objectId\": \"{{object_id}}\",\n      \"transactionType\": \"health_score_updated\",\n      \"context\": { \"previous\": 72, \"current\": 58, \"reason\": \"Open cases increased to 4\" },\n      \"actors\": { \"agent\": \"postman-test\" },\n      \"measures\": { \"previous_score\": 72, \"new_score\": 58 }\n    }\n  }\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
