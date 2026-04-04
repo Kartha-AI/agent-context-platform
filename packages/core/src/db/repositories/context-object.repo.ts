@@ -93,7 +93,8 @@ export class ContextObjectRepo {
     }
 
     if (params.filters) {
-      for (const [path, ops] of Object.entries(params.filters)) {
+      for (const [rawPath, ops] of Object.entries(params.filters)) {
+        const path = rawPath.startsWith('context.') ? rawPath.slice(8) : rawPath;
         const jsonPathText = path.split('.').reduce((acc, p, i, arr) => {
           return i === arr.length - 1 ? `${acc}->>'${p}'` : `${acc}->'${p}'`;
         }, 'context');

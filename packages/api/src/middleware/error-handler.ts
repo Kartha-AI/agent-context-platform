@@ -1,7 +1,21 @@
 import type { APIGatewayProxyResultV2 } from 'aws-lambda';
+import { ZodError } from 'zod';
 import { AcpError, logger } from '@acp/core';
 
 export function handleError(err: unknown): APIGatewayProxyResultV2 {
+  if (err instanceof ZodError) {
+    logger.warn({ errors: err.errors }, 'Validation error');
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        error: 'VALIDATION_ERROR',
+        message: 'Invalid request body',
+        details: err.errors.map((e) => `${e.path.join('.')}: ${e.message}`),
+      }),
+    };
+  }
+
   if (err instanceof AcpError) {
     if (err.statusCode >= 500) {
       logger.error({ err, code: err.code }, err.message);
