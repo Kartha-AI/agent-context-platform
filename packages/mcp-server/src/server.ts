@@ -14,7 +14,25 @@ export function createMcpServer(): McpServer {
 
   server.tool(
     'get_entity',
-    'Retrieve the full context profile for a business entity. Returns current state, recent activity, and all context dimensions. Use when you need comprehensive information about a specific entity.',
+    `Retrieve the full context profile for a business entity. Returns current state, recent transactions, and all context dimensions.
+
+Context is organized into 7 dimensions:
+- attributes: WHAT — identity facts (name, industry, status, segment)
+- measures: HOW MUCH — numbers and KPIs (ARR, health_score, NPS, open_cases)
+- actors: WHO — people and roles (owner, primary_contact, champion)
+- temporals: WHEN — dates and deadlines (renewal_date, last_activity, contract_end)
+- locations: WHERE — geography and channels (region, territory, timezone)
+- intents: WHY — strategy and risk factors (churn_risk, competitors, expansion_potential)
+- processes: HOW — current state and workflow (stage, onboarding_status, sla_status)
+
+Navigation tips for common questions:
+- Risk assessment: check measures + intents + temporals
+- Who to contact: check actors
+- Financial picture: check measures
+- Urgency/deadlines: check temporals + processes
+- Recent activity: check the recentTransactions array
+
+Use id for direct lookup, or type + name for fuzzy name matching.`,
     {
       id: z.string().optional().describe('The object_id UUID'),
       type: z.string().optional().describe("Entity type, e.g. 'customer', 'contact'"),
@@ -28,7 +46,18 @@ export function createMcpServer(): McpServer {
 
   server.tool(
     'search_entities',
-    'Search for entities matching criteria. Supports filtering by type, JSONB field values, and text search on names.',
+    `Search for entities matching criteria. Supports filtering by type, JSONB field values, and text search on names.
+
+Context follows the same 7-dimension structure (attributes, measures, actors, temporals, locations, intents, processes). Use dot-path filters on any dimension:
+- Numbers: { "context.measures.arr": { "gt": 100000 } }
+- Dates: { "context.temporals.renewal_date": { "lt": "2026-06-01" } }
+- Text: { "context.intents.churn_risk": { "eq": "high" } }
+- Status: { "context.attributes.status": { "eq": "active" } }
+- Process: { "context.processes.sla_status": { "eq": "at_risk" } }
+
+Supported operators: eq, gt, gte, lt, lte, contains, in.
+Text search on entity names uses fuzzy matching (trigram).
+Results do not include transactions — use get_entity for full profiles.`,
     {
       type: z.string().optional().describe("Filter by subtype, e.g. 'customer'"),
       filters: z.record(z.record(z.unknown())).optional().describe("JSONB path filters, e.g. { 'context.measures.arr': { 'gt': 100000 } }"),
@@ -43,7 +72,17 @@ export function createMcpServer(): McpServer {
 
   server.tool(
     'get_transactions',
-    "Retrieve transaction history for an entity or across entities. Use when you need detailed activity history beyond what's included in the entity profile.",
+    `Retrieve transaction history for an entity or across entities. Transactions represent events and decisions — cases opened, risk assessed, deals closed, invoices paid, vendor reviewed.
+
+Each transaction has:
+- transactionType: what happened (e.g., "risk_assessed", "case_opened")
+- context: event-specific details (structured JSONB)
+- actors: who was involved (agent name, person, system)
+- measures: quantities involved (scores, amounts, counts)
+- occurred_at: when it happened
+
+Use to check recent activity, track trends, or find previous assessments.
+Filter by objectId for one entity, or by transactionTypes across all entities.`,
     {
       objectId: z.string().optional().describe('Filter transactions for a specific entity'),
       transactionTypes: z.array(z.string()).optional().describe('Filter by transaction type(s)'),
@@ -59,7 +98,14 @@ export function createMcpServer(): McpServer {
 
   server.tool(
     'get_context_changes',
-    'Get entities that changed since a given timestamp. Designed for polling agents that wake up periodically to check for changes.',
+    `Get entities that changed since a given timestamp. Designed for polling — call periodically to discover what changed and act on it.
+
+Each change includes:
+- change_type: created, updated, or transaction_added
+- changes: what fields changed (path, previous value, current value)
+- context_snapshot: key measures and temporals so you can reason about the change without calling get_entity
+
+Returns changes in chronological order. Use the last change's timestamp as "since" for your next poll. This is how proactive agents work — poll for changes, evaluate, act, record decisions via record_transaction.`,
     {
       since: z.string().describe('ISO timestamp — changes after this time'),
       types: z.array(z.string()).optional().describe('Filter by entity subtype(s)'),
@@ -73,7 +119,16 @@ export function createMcpServer(): McpServer {
 
   server.tool(
     'record_transaction',
-    'Record an event or decision for an entity. Use when your agent has assessed, decided, or taken action on an entity and wants to record this for other agents to see.',
+    `Record an event or decision for an entity. Use when you have assessed, decided, or taken action on an entity and want to record it so other agents and users can see it.
+
+Common transaction types:
+- risk_assessed: you evaluated an entity's risk level
+- deal_risk_assessed: you reviewed a sales opportunity
+- overdue_assessed: you flagged an overdue invoice
+- escalation_assessed: you evaluated a case for escalation
+- vendor_review: you scored a vendor's performance
+
+Include structured context (your assessment), actors (who/what made the decision), and measures (relevant numbers). These transactions appear in the changefeed — other polling agents will discover them and can act on your findings.`,
     {
       objectId: z.string().describe('The entity this transaction relates to'),
       transactionType: z.string().describe("Type of event, e.g. 'risk_assessed', 'escalation_created'"),

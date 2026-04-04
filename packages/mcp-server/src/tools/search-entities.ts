@@ -3,7 +3,18 @@ import { ContextObjectRepo } from '@acp/core';
 export const searchEntitiesTool = {
   name: 'search_entities',
   description:
-    'Search for entities matching criteria. Supports filtering by type, JSONB field values, and text search on names. Use when you need to find entities matching specific conditions.',
+    `Search for entities matching criteria. Supports filtering by type, JSONB field values, and text search on names.
+
+Context follows the same 7-dimension structure (attributes, measures, actors, temporals, locations, intents, processes). Use dot-path filters on any dimension:
+- Numbers: { "context.measures.arr": { "gt": 100000 } }
+- Dates: { "context.temporals.renewal_date": { "lt": "2026-06-01" } }
+- Text: { "context.intents.churn_risk": { "eq": "high" } }
+- Status: { "context.attributes.status": { "eq": "active" } }
+- Process: { "context.processes.sla_status": { "eq": "at_risk" } }
+
+Supported operators: eq, gt, gte, lt, lte, contains, in.
+Text search on entity names uses fuzzy matching (trigram).
+Results do not include transactions — use get_entity for full profiles.`,
   inputSchema: {
     type: 'object' as const,
     properties: {

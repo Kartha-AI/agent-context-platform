@@ -730,4 +730,73 @@ acp/
 
 ---
 
+## Schema Evolution
+
+ACP stores context as JSONB, not as database columns. There is no `ALTER TABLE ADD COLUMN` when you add a field. The database doesn't know or care about your schema. This makes schema changes almost free.
+
+### Add a New Field to an Existing Dimension
+
+Update your template YAML, update your pipeline mapping, run `acp connect sync`. New records get the field. Old records don't — they still work, the field is just absent.
+
+```
+Old customer:  context.measures = { arr: 480000, health_score: 34 }
+New customer:  context.measures = { arr: 480000, health_score: 34, churn_probability: 0.72 }
+```
+
+No migration. No downtime. The deep merge adds the new field on the next sync without overwriting existing data. Agents treat missing fields as "not available" rather than zero or false.
+
+### Add a New Dimension
+
+The 7-dimension schema (attributes, measures, actors, temporals, locations, intents, processes) is a convention, not a database constraint. You can add an 8th dimension by putting it in your template and pipeline:
+
+```yaml
+# contexts/customer.yaml — add a "compliance" dimension
+compliance:
+  gdpr_status: { type: string }
+  data_residency: { type: string }
+  last_audit: { type: date }
+```
+
+```yaml
+# pipelines/hubspot.yaml — map source fields to it
+mapping:
+  compliance:
+    gdpr_status: company.gdpr_flag
+    last_audit: company.last_compliance_audit
+```
+
+Run `acp connect sync`. New records get the compliance dimension. Old records keep their 7 dimensions. Both coexist in the same database. No migration needed.
+
+### Rename or Restructure a Field
+
+This is the one case that needs care. If you rename `health_score` to `health_index`, old data has the old key and new data has the new key. Two approaches:
+
+**Gradual migration:** map both fields during transition, update skills and prompts to use the new name, eventually drop the old mapping.
+
+**Backfill script:** update all existing records in one SQL statement:
+
+```sql
+UPDATE context_objects 
+SET context = jsonb_set(
+  context, 
+  '{measures,health_index}', 
+  context->'measures'->'health_score'
+)
+WHERE context->'measures'->'health_score' IS NOT NULL;
+```
+
+### Why This Works
+
+The deep merge on upsert is the key:
+
+```
+Existing: { measures: { arr: 480000, health_score: 34 } }
+Update:   { measures: { churn_probability: 0.72 } }
+Result:   { measures: { arr: 480000, health_score: 34, churn_probability: 0.72 } }
+```
+
+Old fields preserved. New fields added. No data lost. Old and new records coexist. Agents handle missing fields gracefully. Templates and pipelines evolve independently of the database.
+
+---
+
 Built by [Kartha AI](https://kartha.ai)

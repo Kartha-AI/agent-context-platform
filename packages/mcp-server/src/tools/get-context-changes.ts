@@ -3,7 +3,14 @@ import { ChangeLogRepo } from '@acp/core';
 export const getContextChangesTool = {
   name: 'get_context_changes',
   description:
-    'Get entities that changed since a given timestamp. Designed for polling agents that wake up periodically to check for changes. Returns changes with enough context to reason without needing additional calls.',
+    `Get entities that changed since a given timestamp. Designed for polling — call periodically to discover what changed and act on it.
+
+Each change includes:
+- change_type: created, updated, or transaction_added
+- changes: what fields changed (path, previous value, current value)
+- context_snapshot: key measures and temporals so you can reason about the change without calling get_entity
+
+Returns changes in chronological order. Use the last change's timestamp as "since" for your next poll. This is how proactive agents work — poll for changes, evaluate, act, record decisions via record_transaction.`,
   inputSchema: {
     type: 'object' as const,
     required: ['since'],

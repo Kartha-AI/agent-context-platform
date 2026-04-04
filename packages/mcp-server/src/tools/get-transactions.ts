@@ -3,7 +3,17 @@ import { TransactionRepo } from '@acp/core';
 export const getTransactionsTool = {
   name: 'get_transactions',
   description:
-    "Retrieve transaction history for an entity or across entities. Use when you need detailed activity history beyond what's included in the entity profile.",
+    `Retrieve transaction history for an entity or across entities. Transactions represent events and decisions — cases opened, risk assessed, deals closed, invoices paid, vendor reviewed.
+
+Each transaction has:
+- transactionType: what happened (e.g., "risk_assessed", "case_opened")
+- context: event-specific details (structured JSONB)
+- actors: who was involved (agent name, person, system)
+- measures: quantities involved (scores, amounts, counts)
+- occurred_at: when it happened
+
+Use to check recent activity, track trends, or find previous assessments.
+Filter by objectId for one entity, or by transactionTypes across all entities.`,
   inputSchema: {
     type: 'object' as const,
     properties: {
