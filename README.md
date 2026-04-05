@@ -33,9 +33,9 @@ For step-by-step walkthroughs of common scenarios, see the **[How-To Guide](HOWT
 
 ### Prerequisites
 
-- **Node.js** 20.x
-- **pnpm** (`npm install -g pnpm`)
-- **Docker** (for Postgres, API, and MCP server)
+- **Node.js** 20.x -- [download](https://nodejs.org/) or `brew install node@20` (Mac) / `nvm install 20` (any OS)
+- **pnpm** -- `npm install -g pnpm` (after installing Node)
+- **Docker** -- [Docker Desktop](https://www.docker.com/products/docker-desktop/) for Mac/Windows, or `apt install docker.io` on Linux. Make sure Docker is running before proceeding.
 
 ### 1. Start the Platform
 
