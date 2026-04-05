@@ -296,6 +296,40 @@ mapping:
 
 Type coercion is automatic: `measures` fields become numbers, `temporals` become ISO dates, everything else stays as strings.
 
+### Multi-Environment Support
+
+Point the same project at different ACP platforms -- local, staging, production:
+
+```yaml
+# acp.yaml
+environments:
+  local:
+    api_url: http://localhost:3002
+    api_key: dev-local-key
+
+  staging:
+    api_url: https://acp-staging.acme.internal:3002
+    api_key: ${ACP_STAGING_API_KEY}
+
+  prod:
+    api_url: https://acp.acme.internal:3002
+    api_key: ${ACP_PROD_API_KEY}
+
+default: local
+```
+
+```bash
+acp ctx list                        # uses local (default)
+acp ctx list --env staging          # uses staging
+ACP_ENV=prod acp connect sync       # uses prod
+
+acp connect sync --env staging --dry-run  # validate without loading
+```
+
+Resolution priority: `--env` flag > `ACP_ENV` env var > `default` key in acp.yaml. Values like `${ACP_PROD_API_KEY}` are expanded from environment variables at runtime.
+
+The old flat format (`api_url` + `api_key` at root level) still works for single-environment projects.
+
 ---
 
 ## Architecture

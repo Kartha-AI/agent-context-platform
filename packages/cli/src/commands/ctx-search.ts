@@ -1,5 +1,6 @@
 import { Command } from 'commander';
-import { loadConfig } from '../util/config.js';
+import chalk from 'chalk';
+import { resolveConfig } from '../util/config.js';
 import { AcpApiClient } from '../util/api-client.js';
 
 export const ctxSearchCommand = new Command('search')
@@ -7,10 +8,12 @@ export const ctxSearchCommand = new Command('search')
   .option('--query <text>', 'Text search on name')
   .option('--filter <json>', 'JSONB filter (JSON string)')
   .option('--limit <n>', 'Max results', '10')
+  .option('-e, --env <name>', 'Target environment (local, staging, prod)')
   .description('Search for entities')
   .action(async (opts) => {
-    const config = loadConfig();
-    const client = new AcpApiClient(config.api_url, config.api_key);
+    const config = resolveConfig(opts.env);
+    console.log(chalk.dim(`→ ${config.envName}: ${config.apiUrl}`));
+    const client = new AcpApiClient(config.apiUrl, config.apiKey);
 
     const filters = opts.filter ? JSON.parse(opts.filter) : undefined;
     const { results } = await client.searchObjects({

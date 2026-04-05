@@ -1,5 +1,6 @@
 import { Command } from 'commander';
-import { loadConfig } from '../util/config.js';
+import chalk from 'chalk';
+import { resolveConfig } from '../util/config.js';
 import { AcpApiClient } from '../util/api-client.js';
 import { formatTransactions } from '../util/format.js';
 
@@ -9,10 +10,12 @@ export const txnListCommand = new Command('list')
   .option('--since <timestamp>', 'After this ISO timestamp')
   .option('--until <timestamp>', 'Before this ISO timestamp')
   .option('--limit <n>', 'Max results', '20')
+  .option('-e, --env <name>', 'Target environment (local, staging, prod)')
   .description('List transactions')
   .action(async (opts) => {
-    const config = loadConfig();
-    const client = new AcpApiClient(config.api_url, config.api_key);
+    const config = resolveConfig(opts.env);
+    console.log(chalk.dim(`→ ${config.envName}: ${config.apiUrl}`));
+    const client = new AcpApiClient(config.apiUrl, config.apiKey);
 
     const { transactions } = await client.getTransactions({
       objectId: opts.objectId,
