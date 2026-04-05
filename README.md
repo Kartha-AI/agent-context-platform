@@ -3,9 +3,15 @@
 ### Open source context warehouse — any data, any agent, served via MCP/CLI.
 *Think Snowflake — replace data with context, proprietary with open source, SQL with MCP/CLI. Runs anywhere, works with any agent, enterprise scale.*
 
-🚀 **[Get started in 10 minutes](#-quick-start)** · 🏗️ [Architecture](#️-architecture) · 🧠 [Pre-Built Skills](#-pre-built-skills) · 💻 [CLI Reference](#-cli-reference)
+🚀 **[Get started in 10 minutes](#-quick-start)** · 🏗️ [Architecture](#️-architecture) · 🧠 [Pre-Built Skills](#-pre-built-skills) · 💻 [CLI Reference](#-cli-reference) · ❓ [FAQ](FAQ.md)
+
+<p align="center">
+  <img src="acp-intro.png" alt="ACP Overview" width="600"/>
+</p>
 
 ---
+
+### 💡 Why ACP?
 
 **The agent is the easy part. Context is the hard part.**
 
@@ -16,6 +22,8 @@ Your AI agent is only as useful as what it knows about your business. Kartha ACP
 - **Serve** to any AI agent via MCP or CLI in a single call
 - **Extend** with your own context types — customers, invoices, fleet vehicles, clinical trials, anything
 - **Automate** with pre-built skills that monitor, assess, and act — continuously, not just when you ask
+
+*Uploading a spreadsheet to Claude works for one-off questions — ACP is for when you need persistent, cross-system context that multiple agents, people, and teams across your business share continuously. ([More in FAQ](FAQ.md#cant-i-just-upload-a-spreadsheet-to-claude-or-chatgpt-and-ask-questions))*
 
 ```
 Your data (CRM, billing, support, ERP, spreadsheets, any system)
@@ -141,6 +149,7 @@ acp ctx list                     # see what's loaded
 - [🛠️ Local Development](#️-local-development)
 - [📁 Project Structure](#-project-structure)
 - [🔄 Schema Evolution](#-schema-evolution)
+- [❓ FAQ](FAQ.md)
 
 ---
 
