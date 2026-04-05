@@ -3,6 +3,10 @@
 ### Open source context warehouse — any data, any agent, served via MCP/CLI.
 *Think Snowflake — replace data with context, proprietary with open source, SQL with MCP/CLI. Runs anywhere, works with any agent, enterprise scale.*
 
+🚀 **[Get started in 10 minutes](#-quick-start)** · 🏗️ [Architecture](#️-architecture) · 🧠 [Pre-Built Skills](#-pre-built-skills) · 💻 [CLI Reference](#-cli-reference)
+
+---
+
 **The agent is the easy part. Context is the hard part.**
 
 Your AI agent is only as useful as what it knows about your business. Kartha ACP is the context layer that makes agents useful:
@@ -12,8 +16,6 @@ Your AI agent is only as useful as what it knows about your business. Kartha ACP
 - **Serve** to any AI agent via MCP or CLI in a single call
 - **Extend** with your own context types — customers, invoices, fleet vehicles, clinical trials, anything
 - **Automate** with pre-built skills that monitor, assess, and act — continuously, not just when you ask
-
-Ships with 10 standard context types and 5 APQC-based business skills. Or define your own with a YAML template.
 
 ```
 Your data (CRM, billing, support, ERP, spreadsheets, any system)
@@ -29,19 +31,17 @@ Your data (CRM, billing, support, ERP, spreadsheets, any system)
       processes:   HOW      — onboarding complete, support tier premium
 ```
 
-Open source. Runs locally via Docker Compose. Deploys to AWS/GCP for teams to share context across agents and people.
-
-**→ [Get started in 10 minutes](#quick-start)** · [Architecture](#architecture) · [Pre-Built Skills](#pre-built-skills) · [CLI Reference](#cli-reference)
+Ships with 10 standard context types and 5 APQC-based business skills. Or define your own with a YAML template. Open source. Runs locally via Docker Compose. Deploys to AWS/GCP for teams to share context across agents and people.
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- **Node.js** 20.x
-- **pnpm** (`npm install -g pnpm`)
-- **Docker** (for Postgres, API, and MCP server)
+- **Node.js** 20.x — [download](https://nodejs.org/) or `brew install node@20` (Mac) / `nvm install 20` (any OS)
+- **pnpm** — `npm install -g pnpm` (after installing Node)
+- **Docker** — [Docker Desktop](https://www.docker.com/products/docker-desktop/) for Mac/Windows, or `apt install docker.io` on Linux. Make sure Docker is running before proceeding.
 
 ### 1. Start the Platform
 
@@ -127,23 +127,24 @@ acp ctx list                     # see what's loaded
 
 ---
 
-## Table of Contents
+## 📑 Table of Contents
 
-- [Why ACP?](#why-acp)
-- [How It Works](#how-it-works)
-- [Pre-Built Skills](#pre-built-skills)
-- [CLI Reference](#cli-reference)
-- [Architecture](#architecture)
-- [Context Object Model](#context-object-model)
-- [MCP Tools](#mcp-tools)
-- [REST API](#rest-api)
-- [Deployment](#deployment)
-- [Local Development](#local-development)
-- [Project Structure](#project-structure)
+- [💡 Why ACP?](#-why-acp)
+- [⚙️ How It Works](#️-how-it-works)
+- [🧠 Pre-Built Skills](#-pre-built-skills)
+- [💻 CLI Reference](#-cli-reference)
+- [🏗️ Architecture](#️-architecture)
+- [📐 Context Object Model](#-context-object-model)
+- [🔌 MCP Tools](#-mcp-tools)
+- [🌐 REST API](#-rest-api)
+- [☁️ Deployment](#️-deployment)
+- [🛠️ Local Development](#️-local-development)
+- [📁 Project Structure](#-project-structure)
+- [🔄 Schema Evolution](#-schema-evolution)
 
 ---
 
-## Why ACP?
+## 💡 Why ACP?
 
 Every AI agent framework -- CrewAI, LangGraph, AutoGen, Mastra, Claude, GPT -- has the same unsolved problem: **where does the agent get good business context?**
 
@@ -197,7 +198,7 @@ Agent reasons on structured, typed, reliable data. One call. No guesswork.
 
 ---
 
-## How It Works
+## ⚙️ How It Works
 
 **The platform** runs as Docker containers (Postgres + REST API + MCP server). It's schema-agnostic -- stores any JSONB context, deep merges it, tracks changes.
 
@@ -237,7 +238,7 @@ Connect an agent and ask.                Repeatable. Consistent. Builds history.
 
 ---
 
-## Pre-Built Skills
+## 🧠 Pre-Built Skills
 
 Skills are pre-built agent workflows that run on top of ACP data. They provide the business logic -- what to check, how to assess, what to record. Your agent runtime (Claude Desktop, CrewAI, LangGraph) runs the skill. ACP provides the data.
 
@@ -269,7 +270,7 @@ skills/customer-health-monitor/
 
 ---
 
-## CLI Reference
+## 💻 CLI Reference
 
 ### Project Commands
 
@@ -317,7 +318,7 @@ Type coercion is automatic: `measures` fields become numbers, `temporals` become
 
 ---
 
-## Architecture
+## 🏗️ Architecture
 
 ![ACP Overview](acp-overview.png)
 
@@ -381,7 +382,7 @@ Agent reasons → record_transaction → context_transactions + change_log → o
 
 ---
 
-## Context Object Model
+## 📐 Context Object Model
 
 ### 7-Dimension Schema
 
@@ -433,7 +434,7 @@ Three tables back the platform:
 
 ---
 
-## MCP Tools
+## 🔌 MCP Tools
 
 5 tools over Streamable HTTP transport:
 
@@ -449,7 +450,7 @@ Filter operators: `eq`, `gt`, `gte`, `lt`, `lte`, `contains`
 
 ---
 
-## REST API
+## 🌐 REST API
 
 | Method | Path | Purpose |
 |--------|------|---------|
@@ -470,7 +471,7 @@ Authentication: `Authorization: Bearer <api-key>`. All endpoints except `/v1/hea
 
 ---
 
-## Deployment
+## ☁️ Deployment
 
 ### Local (development)
 
@@ -503,7 +504,7 @@ Deploys three stacks:
 
 ---
 
-## Local Development
+## 🛠️ Local Development
 
 ### Docker Compose (recommended)
 
@@ -718,7 +719,7 @@ curl -X POST http://localhost:3001/mcp \
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 acp/
@@ -753,7 +754,7 @@ acp/
 
 ---
 
-## Schema Evolution
+## 🔄 Schema Evolution
 
 ACP stores context as JSONB, not as database columns. There is no `ALTER TABLE ADD COLUMN` when you add a field. The database doesn't know or care about your schema. This makes schema changes almost free.
 
