@@ -1,41 +1,55 @@
 # Agent Context Platform (ACP)
 
-**Give your AI agents a unified view of your business data.**
+### Open source context warehouse — any data, any agent, served via MCP/CLI.
+*Think Snowflake — replace data with context, proprietary with open source, SQL with MCP/CLI. Runs anywhere, works with any agent, enterprise scale.*
 
-Instead of wiring up individual MCP servers to Salesforce, HubSpot, Stripe, and every other system -- extract your data once, curate it into a canonical schema, and serve it through a single MCP server. Any agent framework connects to ACP and gets everything it needs in one call.
+🚀 **[Get started in 10 minutes](#-quick-start)** · 🏗️ [Architecture](#️-architecture) · 🧠 [Pre-Built Skills](#-pre-built-skills) · 💻 [CLI Reference](#-cli-reference) · ❓ [FAQ](FAQ.md)
 
-```
-Your data (CRM, billing, support, ERP)
-  → ACP curates into 7-dimension context profiles
-  → Agents query via MCP: "What's happening with Acme Corp?"
-  → One call returns everything, organized by dimension:
-      measures:  ARR $480K, health score 34, NPS 28
-      temporals: renewal in 45 days, last QBR 3 months ago
-      actors:    owner Sarah Chen, contact Jane Lee
-      intents:   churn risk HIGH, expansion potential LOW
-      processes: onboarding complete, support tier premium
-```
-
-**Who is this for:**
-- Teams building AI agents that need business context (customer success, sales ops, finance, procurement)
-- Developers integrating multiple data sources into agent workflows
-- Anyone tired of wiring up one MCP server per system
-
-ACP is open source, runs locally via Docker Compose, and deploys to AWS for team use.
-
-![ACP Overview](acp-overview.png)
-
-For step-by-step walkthroughs of common scenarios, see the **[How-To Guide](HOWTO.md)**.
+<p align="center">
+  <img src="acp-intro.png" alt="ACP Overview" width="1000"/>
+</p>
 
 ---
 
-## Quick Start
+### 💡 Why ACP?
+
+**The agent is the easy part. Context is the hard part.**
+
+Your AI agent is only as useful as what it knows about your business. Kartha ACP is the context layer that makes agents useful:
+
+- **Extract** from any system — CRM, billing, support, ERP, spreadsheets, databases, enterprise APIs
+- **Curate** into structured 7-dimension context profiles (what, how much, who, when, where, why, how)
+- **Serve** to any AI agent via MCP or CLI in a single call
+- **Extend** with your own context types — customers, invoices, fleet vehicles, clinical trials, anything
+- **Automate** with pre-built skills that monitor, assess, and act — continuously, not just when you ask
+
+*Uploading a spreadsheet to Claude works for one-off questions — ACP is for when you need persistent, cross-system context that multiple agents, people, and teams across your business share continuously. ([More in FAQ](FAQ.md#cant-i-just-upload-a-spreadsheet-to-claude-or-chatgpt-and-ask-questions))*
+
+```
+Your data (CRM, billing, support, ERP, spreadsheets, any system)
+  → ACP curates into 7-dimension context profiles
+  → Agents query via MCP: "What's happening with Acme Corp?"
+  → One call returns everything, organized by dimension:
+      attributes:  WHAT     — name: Acme Corp, industry: SaaS, segment: enterprise
+      measures:    HOW MUCH — ARR $480K, health score 34, NPS 28
+      actors:      WHO      — owner: Sarah Chen, contact: Jane Lee
+      temporals:   WHEN     — renewal in 45 days, last QBR 3 months ago
+      locations:   WHERE    — region: West, territory: US-Pacific
+      intents:     WHY      — churn risk HIGH, expansion potential LOW
+      processes:   HOW      — onboarding complete, support tier premium
+```
+
+Ships with 10 standard context types and 5 APQC-based business skills. Or define your own with a YAML template. Open source. Runs locally via Docker Compose. Deploys to AWS/GCP for teams to share context across agents and people.
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- **Node.js** 20.x -- [download](https://nodejs.org/) or `brew install node@20` (Mac) / `nvm install 20` (any OS)
-- **pnpm** -- `npm install -g pnpm` (after installing Node)
-- **Docker** -- [Docker Desktop](https://www.docker.com/products/docker-desktop/) for Mac/Windows, or `apt install docker.io` on Linux. Make sure Docker is running before proceeding.
+- **Node.js** 20.x — [download](https://nodejs.org/) or `brew install node@20` (Mac) / `nvm install 20` (any OS)
+- **pnpm** — `npm install -g pnpm` (after installing Node)
+- **Docker** — [Docker Desktop](https://www.docker.com/products/docker-desktop/) for Mac/Windows, or `apt install docker.io` on Linux. Make sure Docker is running before proceeding.
 
 ### 1. Start the Platform
 
@@ -86,8 +100,21 @@ acp changes --since 2026-03-01T00:00:00Z
 Add to your `claude_desktop_config.json`:
 
 ```json
-{ "mcpServers": { "acp": { "url": "http://localhost:3001/mcp" } } }
+{
+  "mcpServers": {
+    "acp": {
+      "command": "node",
+      "args": ["{path-to-acp}/packages/mcp-server/dist/index.js"],
+      "env": {
+        "ACP_MCP_TRANSPORT": "stdio",
+        "DATABASE_URL": "postgresql://acp:localdev@localhost:5432/acp"
+      }
+    }
+  }
+}
 ```
+
+Replace `{path-to-acp}` with the absolute path to your cloned repo.
 
 Now ask Claude:
 
@@ -108,23 +135,25 @@ acp ctx list                     # see what's loaded
 
 ---
 
-## Table of Contents
+## 📑 Table of Contents
 
-- [Why ACP?](#why-acp)
-- [How It Works](#how-it-works)
-- [Pre-Built Skills](#pre-built-skills)
-- [CLI Reference](#cli-reference)
-- [Architecture](#architecture)
-- [Context Object Model](#context-object-model)
-- [MCP Tools](#mcp-tools)
-- [REST API](#rest-api)
-- [Deployment](#deployment)
-- [Local Development](#local-development)
-- [Project Structure](#project-structure)
+- [💡 Why ACP?](#-why-acp)
+- [⚙️ How It Works](#️-how-it-works)
+- [🧠 Pre-Built Skills](#-pre-built-skills)
+- [💻 CLI Reference](#-cli-reference)
+- [🏗️ Architecture](#️-architecture)
+- [📐 Context Object Model](#-context-object-model)
+- [🔌 MCP Tools](#-mcp-tools)
+- [🌐 REST API](#-rest-api)
+- [☁️ Deployment](#️-deployment)
+- [🛠️ Local Development](#️-local-development)
+- [📁 Project Structure](#-project-structure)
+- [🔄 Schema Evolution](#-schema-evolution)
+- [❓ FAQ](FAQ.md)
 
 ---
 
-## Why ACP?
+## 💡 Why ACP?
 
 Every AI agent framework -- CrewAI, LangGraph, AutoGen, Mastra, Claude, GPT -- has the same unsolved problem: **where does the agent get good business context?**
 
@@ -178,7 +207,7 @@ Agent reasons on structured, typed, reliable data. One call. No guesswork.
 
 ---
 
-## How It Works
+## ⚙️ How It Works
 
 **The platform** runs as Docker containers (Postgres + REST API + MCP server). It's schema-agnostic -- stores any JSONB context, deep merges it, tracks changes.
 
@@ -218,7 +247,7 @@ Connect an agent and ask.                Repeatable. Consistent. Builds history.
 
 ---
 
-## Pre-Built Skills
+## 🧠 Pre-Built Skills
 
 Skills are pre-built agent workflows that run on top of ACP data. They provide the business logic -- what to check, how to assess, what to record. Your agent runtime (Claude Desktop, CrewAI, LangGraph) runs the skill. ACP provides the data.
 
@@ -250,7 +279,7 @@ skills/customer-health-monitor/
 
 ---
 
-## CLI Reference
+## 💻 CLI Reference
 
 ### Project Commands
 
@@ -296,43 +325,11 @@ mapping:
 
 Type coercion is automatic: `measures` fields become numbers, `temporals` become ISO dates, everything else stays as strings.
 
-### Multi-Environment Support
-
-Point the same project at different ACP platforms -- local, staging, production:
-
-```yaml
-# acp.yaml
-environments:
-  local:
-    api_url: http://localhost:3002
-    api_key: dev-local-key
-
-  staging:
-    api_url: https://acp-staging.acme.internal:3002
-    api_key: ${ACP_STAGING_API_KEY}
-
-  prod:
-    api_url: https://acp.acme.internal:3002
-    api_key: ${ACP_PROD_API_KEY}
-
-default: local
-```
-
-```bash
-acp ctx list                        # uses local (default)
-acp ctx list --env staging          # uses staging
-ACP_ENV=prod acp connect sync       # uses prod
-
-acp connect sync --env staging --dry-run  # validate without loading
-```
-
-Resolution priority: `--env` flag > `ACP_ENV` env var > `default` key in acp.yaml. Values like `${ACP_PROD_API_KEY}` are expanded from environment variables at runtime.
-
-The old flat format (`api_url` + `api_key` at root level) still works for single-environment projects.
-
 ---
 
-## Architecture
+## 🏗️ Architecture
+
+![ACP Overview](acp-overview.png)
 
 [View interactive architecture diagram](https://htmlpreview.github.io/?https://github.com/Kartha-AI/agent-context-platform/blob/main/acp-architecture.html)
 
@@ -394,7 +391,7 @@ Agent reasons → record_transaction → context_transactions + change_log → o
 
 ---
 
-## Context Object Model
+## 📐 Context Object Model
 
 ### 7-Dimension Schema
 
@@ -446,7 +443,7 @@ Three tables back the platform:
 
 ---
 
-## MCP Tools
+## 🔌 MCP Tools
 
 5 tools over Streamable HTTP transport:
 
@@ -462,7 +459,7 @@ Filter operators: `eq`, `gt`, `gte`, `lt`, `lte`, `contains`
 
 ---
 
-## REST API
+## 🌐 REST API
 
 | Method | Path | Purpose |
 |--------|------|---------|
@@ -483,7 +480,7 @@ Authentication: `Authorization: Bearer <api-key>`. All endpoints except `/v1/hea
 
 ---
 
-## Deployment
+## ☁️ Deployment
 
 ### Local (development)
 
@@ -516,7 +513,7 @@ Deploys three stacks:
 
 ---
 
-## Local Development
+## 🛠️ Local Development
 
 ### Docker Compose (recommended)
 
@@ -731,7 +728,7 @@ curl -X POST http://localhost:3001/mcp \
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 acp/
@@ -766,7 +763,7 @@ acp/
 
 ---
 
-## Schema Evolution
+## 🔄 Schema Evolution
 
 ACP stores context as JSONB, not as database columns. There is no `ALTER TABLE ADD COLUMN` when you add a field. The database doesn't know or care about your schema. This makes schema changes almost free.
 
