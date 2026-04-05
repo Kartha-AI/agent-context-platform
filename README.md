@@ -92,8 +92,21 @@ acp changes --since 2026-03-01T00:00:00Z
 Add to your `claude_desktop_config.json`:
 
 ```json
-{ "mcpServers": { "acp": { "url": "http://localhost:3001/mcp" } } }
+{
+  "mcpServers": {
+    "acp": {
+      "command": "node",
+      "args": ["{path-to-acp}/packages/mcp-server/dist/index.js"],
+      "env": {
+        "ACP_MCP_TRANSPORT": "stdio",
+        "DATABASE_URL": "postgresql://acp:localdev@localhost:5432/acp"
+      }
+    }
+  }
+}
 ```
+
+Replace `{path-to-acp}` with the absolute path to your cloned repo.
 
 Now ask Claude:
 
