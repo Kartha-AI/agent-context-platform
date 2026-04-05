@@ -1,5 +1,6 @@
 import { Command } from 'commander';
-import { loadConfig } from '../util/config.js';
+import chalk from 'chalk';
+import { resolveConfig } from '../util/config.js';
 import { AcpApiClient } from '../util/api-client.js';
 import { formatEntityProfile } from '../util/format.js';
 
@@ -9,9 +10,11 @@ export const ctxGetCommand = new Command('get')
   .argument('<type>', 'Entity type (e.g., customer)')
   .argument('<nameOrId>', 'Entity name or UUID')
   .description('Get full context profile for an entity')
-  .action(async (type: string, nameOrId: string) => {
-    const config = loadConfig();
-    const client = new AcpApiClient(config.api_url, config.api_key);
+  .option('-e, --env <name>', 'Target environment (local, staging, prod)')
+  .action(async (type: string, nameOrId: string, opts) => {
+    const config = resolveConfig(opts.env);
+    console.log(chalk.dim(`→ ${config.envName}: ${config.apiUrl}`));
+    const client = new AcpApiClient(config.apiUrl, config.apiKey);
 
     let entity: Record<string, unknown>;
 
@@ -23,7 +26,6 @@ export const ctxGetCommand = new Command('get')
         console.error(`No ${type} found matching "${nameOrId}"`);
         process.exit(1);
       }
-      // Re-fetch with full profile (includes transactions)
       const match = results[0] as Record<string, unknown>;
       entity = await client.getObject(match.objectId as string) as Record<string, unknown>;
     }

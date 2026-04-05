@@ -1,5 +1,6 @@
 import { Command } from 'commander';
-import { loadConfig } from '../util/config.js';
+import chalk from 'chalk';
+import { resolveConfig } from '../util/config.js';
 import { AcpApiClient } from '../util/api-client.js';
 import { formatChanges } from '../util/format.js';
 
@@ -7,10 +8,12 @@ export const changesCommand = new Command('changes')
   .requiredOption('--since <timestamp>', 'ISO timestamp')
   .option('--types <types>', 'Filter by subtype(s), comma-separated')
   .option('--limit <n>', 'Max results', '50')
+  .option('-e, --env <name>', 'Target environment (local, staging, prod)')
   .description('Show what changed since a timestamp')
   .action(async (opts) => {
-    const config = loadConfig();
-    const client = new AcpApiClient(config.api_url, config.api_key);
+    const config = resolveConfig(opts.env);
+    console.log(chalk.dim(`→ ${config.envName}: ${config.apiUrl}`));
+    const client = new AcpApiClient(config.apiUrl, config.apiKey);
 
     const { changes, cursor } = await client.getChanges({
       since: opts.since,

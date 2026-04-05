@@ -1,10 +1,13 @@
 import { Command } from 'commander';
-import { loadConfig } from '../util/config.js';
+import chalk from 'chalk';
+import { resolveConfig } from '../util/config.js';
 
 export const connectListCommand = new Command('list')
   .description('List configured connectors')
-  .action(async () => {
-    const config = loadConfig();
+  .option('-e, --env <name>', 'Target environment (local, staging, prod)')
+  .action(async (opts) => {
+    const config = resolveConfig(opts.env);
+    console.log(chalk.dim(`→ ${config.envName}: ${config.apiUrl}`));
     const connectors = config.connectors ?? [];
 
     if (connectors.length === 0) {

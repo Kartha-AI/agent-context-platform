@@ -1,5 +1,6 @@
 import { Command } from 'commander';
-import { loadConfig } from '../util/config.js';
+import chalk from 'chalk';
+import { resolveConfig } from '../util/config.js';
 import { AcpApiClient } from '../util/api-client.js';
 
 export const txnAddCommand = new Command('add')
@@ -8,10 +9,12 @@ export const txnAddCommand = new Command('add')
   .option('--context <json>', 'Transaction context (JSON)', '{}')
   .option('--actors <json>', 'Actors involved (JSON)')
   .option('--measures <json>', 'Measures (JSON)')
+  .option('-e, --env <name>', 'Target environment (local, staging, prod)')
   .description('Record a transaction for an entity')
   .action(async (opts) => {
-    const config = loadConfig();
-    const client = new AcpApiClient(config.api_url, config.api_key);
+    const config = resolveConfig(opts.env);
+    console.log(chalk.dim(`→ ${config.envName}: ${config.apiUrl}`));
+    const client = new AcpApiClient(config.apiUrl, config.apiKey);
 
     const result = await client.recordTransaction(opts.objectId, {
       transactionType: opts.type,

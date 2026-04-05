@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import { join } from 'path';
-import { loadConfig, getProjectRoot } from '../util/config.js';
+import chalk from 'chalk';
+import { resolveConfig, getProjectRoot } from '../util/config.js';
 import { loadProjectTemplates } from '../util/template-loader.js';
 import { validateContext } from '../util/validator.js';
 import { AcpApiClient } from '../util/api-client.js';
@@ -13,10 +14,13 @@ const BATCH_SIZE = 100;
 
 export const connectSyncCommand = new Command('sync')
   .description('Validate and load data into the platform')
-  .action(async () => {
+  .option('-e, --env <name>', 'Target environment (local, staging, prod)')
+  .option('--dry-run', 'Validate and map data but do not POST to the platform')
+  .action(async (opts) => {
     const root = getProjectRoot();
-    const config = loadConfig();
-    const client = new AcpApiClient(config.api_url, config.api_key);
+    const config = resolveConfig(opts.env);
+    console.log(chalk.dim(`→ ${config.envName}: ${config.apiUrl}`));
+    const client = new AcpApiClient(config.apiUrl, config.apiKey);
     const templates = loadProjectTemplates(join(root, 'contexts'));
 
     const connectors = config.connectors ?? [];
@@ -28,6 +32,7 @@ export const connectSyncCommand = new Command('sync')
     let totalCreated = 0;
     let totalUpdated = 0;
     let totalErrors = 0;
+    let totalValidated = 0;
 
     for (const conn of connectors) {
       console.log(`\nSyncing: ${conn.name}`);
@@ -67,6 +72,13 @@ export const connectSyncCommand = new Command('sync')
         console.log(`  ${validationErrors} validation error(s)`);
       }
 
+      totalValidated += valid.length;
+
+      if (opts.dryRun) {
+        console.log(`  ${valid.length} records validated`);
+        continue;
+      }
+
       // Batch upload
       for (let i = 0; i < valid.length; i += BATCH_SIZE) {
         const batch = valid.slice(i, i + BATCH_SIZE);
@@ -87,5 +99,10 @@ export const connectSyncCommand = new Command('sync')
       console.log(`  Loaded ${valid.length} records`);
     }
 
-    console.log(`\nSync complete: ${totalCreated} created, ${totalUpdated} updated, ${totalErrors} errors`);
+    if (opts.dryRun) {
+      console.log(chalk.green(`\nDry run complete. ${totalValidated} entities validated.`));
+      console.log(chalk.dim('No data was sent to the platform.'));
+    } else {
+      console.log(`\nSync complete: ${totalCreated} created, ${totalUpdated} updated, ${totalErrors} errors`);
+    }
   });
