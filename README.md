@@ -6,7 +6,7 @@
 🚀 **[Get started in 10 minutes](#-quick-start)** · 🏗️ [Architecture](#️-architecture) · 🧠 [Pre-Built Skills](#-pre-built-skills) · 💻 [CLI Reference](#-cli-reference) · ❓ [FAQ](FAQ.md)
 
 <p align="center">
-  <img src="acp-intro.png" alt="ACP Overview" width="600"/>
+  <img src="acp-intro.png" alt="ACP Overview" width="1000"/>
 </p>
 
 ---
