@@ -25,6 +25,8 @@ ACP is open source, runs locally via Docker Compose, and deploys to AWS for team
 
 ![ACP Overview](acp-overview.png)
 
+For step-by-step walkthroughs of common scenarios, see the **[How-To Guide](HOWTO.md)**.
+
 ---
 
 ## Quick Start
