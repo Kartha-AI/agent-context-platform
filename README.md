@@ -1,31 +1,37 @@
 # Agent Context Platform (ACP)
 
-**Give your AI agents a unified view of your business data.**
+### Open source context warehouse — any data, any agent, served via MCP/CLI.
+*Think Snowflake — replace data with context, proprietary with open source, SQL with MCP/CLI. Runs anywhere, works with any agent, enterprise scale.*
 
-Instead of wiring up individual MCP servers to Salesforce, HubSpot, Stripe, and every other system -- extract your data once, curate it into a canonical schema, and serve it through a single MCP server. Any agent framework connects to ACP and gets everything it needs in one call.
+**The agent is the easy part. Context is the hard part.**
+
+Your AI agent is only as useful as what it knows about your business. Kartha ACP is the context layer that makes agents useful:
+
+- **Extract** from any system — CRM, billing, support, ERP, spreadsheets, databases, enterprise APIs
+- **Curate** into structured 7-dimension context profiles (what, how much, who, when, where, why, how)
+- **Serve** to any AI agent via MCP or CLI in a single call
+- **Extend** with your own context types — customers, invoices, fleet vehicles, clinical trials, anything
+- **Automate** with pre-built skills that monitor, assess, and act — continuously, not just when you ask
+
+Ships with 10 standard context types and 5 APQC-based business skills. Or define your own with a YAML template.
 
 ```
-Your data (CRM, billing, support, ERP)
+Your data (CRM, billing, support, ERP, spreadsheets, any system)
   → ACP curates into 7-dimension context profiles
   → Agents query via MCP: "What's happening with Acme Corp?"
   → One call returns everything, organized by dimension:
-      measures:  ARR $480K, health score 34, NPS 28
-      temporals: renewal in 45 days, last QBR 3 months ago
-      actors:    owner Sarah Chen, contact Jane Lee
-      intents:   churn risk HIGH, expansion potential LOW
-      processes: onboarding complete, support tier premium
+      attributes:  WHAT     — name: Acme Corp, industry: SaaS, segment: enterprise
+      measures:    HOW MUCH — ARR $480K, health score 34, NPS 28
+      actors:      WHO      — owner: Sarah Chen, contact: Jane Lee
+      temporals:   WHEN     — renewal in 45 days, last QBR 3 months ago
+      locations:   WHERE    — region: West, territory: US-Pacific
+      intents:     WHY      — churn risk HIGH, expansion potential LOW
+      processes:   HOW      — onboarding complete, support tier premium
 ```
 
-**Who is this for:**
-- Teams building AI agents that need business context (customer success, sales ops, finance, procurement)
-- Developers integrating multiple data sources into agent workflows
-- Anyone tired of wiring up one MCP server per system
+Open source. Runs locally via Docker Compose. Deploys to AWS/GCP for teams to share context across agents and people.
 
-ACP is open source, runs locally via Docker Compose, and deploys to AWS for team use.
-
-![ACP Overview](acp-overview.png)
-
-For step-by-step walkthroughs of common scenarios, see the **[How-To Guide](HOWTO.md)**.
+**→ [Get started in 10 minutes](#quick-start)** · [Architecture](#architecture) · [Pre-Built Skills](#pre-built-skills) · [CLI Reference](#cli-reference)
 
 ---
 
@@ -33,9 +39,9 @@ For step-by-step walkthroughs of common scenarios, see the **[How-To Guide](HOWT
 
 ### Prerequisites
 
-- **Node.js** 20.x -- [download](https://nodejs.org/) or `brew install node@20` (Mac) / `nvm install 20` (any OS)
-- **pnpm** -- `npm install -g pnpm` (after installing Node)
-- **Docker** -- [Docker Desktop](https://www.docker.com/products/docker-desktop/) for Mac/Windows, or `apt install docker.io` on Linux. Make sure Docker is running before proceeding.
+- **Node.js** 20.x
+- **pnpm** (`npm install -g pnpm`)
+- **Docker** (for Postgres, API, and MCP server)
 
 ### 1. Start the Platform
 
@@ -296,43 +302,11 @@ mapping:
 
 Type coercion is automatic: `measures` fields become numbers, `temporals` become ISO dates, everything else stays as strings.
 
-### Multi-Environment Support
-
-Point the same project at different ACP platforms -- local, staging, production:
-
-```yaml
-# acp.yaml
-environments:
-  local:
-    api_url: http://localhost:3002
-    api_key: dev-local-key
-
-  staging:
-    api_url: https://acp-staging.acme.internal:3002
-    api_key: ${ACP_STAGING_API_KEY}
-
-  prod:
-    api_url: https://acp.acme.internal:3002
-    api_key: ${ACP_PROD_API_KEY}
-
-default: local
-```
-
-```bash
-acp ctx list                        # uses local (default)
-acp ctx list --env staging          # uses staging
-ACP_ENV=prod acp connect sync       # uses prod
-
-acp connect sync --env staging --dry-run  # validate without loading
-```
-
-Resolution priority: `--env` flag > `ACP_ENV` env var > `default` key in acp.yaml. Values like `${ACP_PROD_API_KEY}` are expanded from environment variables at runtime.
-
-The old flat format (`api_url` + `api_key` at root level) still works for single-environment projects.
-
 ---
 
 ## Architecture
+
+![ACP Overview](acp-overview.png)
 
 [View interactive architecture diagram](https://htmlpreview.github.io/?https://github.com/Kartha-AI/agent-context-platform/blob/main/acp-architecture.html)
 
