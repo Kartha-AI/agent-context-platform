@@ -6,40 +6,8 @@
 🚀 **[Get started in 10 minutes](#-quick-start)** · 🏗️ [Architecture](#️-architecture) · 🧠 [Pre-Built Skills](#-pre-built-skills) · 💻 [CLI Reference](#-cli-reference) · ❓ [FAQ](FAQ.md)
 
 <p align="center">
-  <img src="acp-intro.png" alt="ACP Overview" width="1000"/>
+  <img src="acp-intro.png" alt="ACP Overview" width="100%"/>
 </p>
-
----
-
-### 💡 Why ACP?
-
-**The agent is the easy part. Context is the hard part.**
-
-Your AI agent is only as useful as what it knows about your business. Kartha ACP is the context layer that makes agents useful:
-
-- **Extract** from any system — CRM, billing, support, ERP, spreadsheets, databases, enterprise APIs
-- **Curate** into structured 7-dimension context profiles (what, how much, who, when, where, why, how)
-- **Serve** to any AI agent via MCP or CLI in a single call
-- **Extend** with your own context types — customers, invoices, fleet vehicles, clinical trials, anything
-- **Automate** with pre-built skills that monitor, assess, and act — continuously, not just when you ask
-
-*Uploading a spreadsheet to Claude works for one-off questions — ACP is for when you need persistent, cross-system context that multiple agents, people, and teams across your business share continuously. ([More in FAQ](FAQ.md#cant-i-just-upload-a-spreadsheet-to-claude-or-chatgpt-and-ask-questions))*
-
-```
-Your data (CRM, billing, support, ERP, spreadsheets, any system)
-  → ACP curates into 7-dimension context profiles
-  → Agents query via MCP: "What's happening with Acme Corp?"
-  → One call returns everything, organized by dimension:
-      attributes:  WHAT     — name: Acme Corp, industry: SaaS, segment: enterprise
-      measures:    HOW MUCH — ARR $480K, health score 34, NPS 28
-      actors:      WHO      — owner: Sarah Chen, contact: Jane Lee
-      temporals:   WHEN     — renewal in 45 days, last QBR 3 months ago
-      locations:   WHERE    — region: West, territory: US-Pacific
-      intents:     WHY      — churn risk HIGH, expansion potential LOW
-      processes:   HOW      — onboarding complete, support tier premium
-```
-
-Ships with 10 standard context types and 5 APQC-based business skills. Or define your own with a YAML template. Open source. Runs locally via Docker Compose. Deploys to AWS/GCP for teams to share context across agents and people.
 
 ---
 
@@ -155,7 +123,35 @@ acp ctx list                     # see what's loaded
 
 ## 💡 Why ACP?
 
-Every AI agent framework -- CrewAI, LangGraph, AutoGen, Mastra, Claude, GPT -- has the same unsolved problem: **where does the agent get good business context?**
+**The agent is the easy part. Context is the hard part.**
+
+Your AI agent is only as useful as what it knows about your business. Kartha ACP is the context layer that makes agents useful:
+
+- **Extract** from any system — CRM, billing, support, ERP, spreadsheets, databases, enterprise APIs
+- **Curate** into structured 7-dimension context profiles (what, how much, who, when, where, why, how)
+- **Serve** to any AI agent via MCP or CLI in a single call
+- **Extend** with your own context types — customers, invoices, fleet vehicles, clinical trials, anything
+- **Automate** with pre-built skills that monitor, assess, and act — continuously, not just when you ask
+
+*Uploading a spreadsheet to Claude works for one-off questions — ACP is for when you need persistent, cross-system context that multiple agents, people, and teams across your business share continuously. ([More in FAQ](FAQ.md#cant-i-just-upload-a-spreadsheet-to-claude-or-chatgpt-and-ask-questions))*
+
+```
+Your data (CRM, billing, support, ERP, spreadsheets, any system)
+  → ACP curates into 7-dimension context profiles
+  → Agents query via MCP: "What's happening with Acme Corp?"
+  → One call returns everything, organized by dimension:
+      attributes:  WHAT     — name: Acme Corp, industry: SaaS, segment: enterprise
+      measures:    HOW MUCH — ARR $480K, health score 34, NPS 28
+      actors:      WHO      — owner: Sarah Chen, contact: Jane Lee
+      temporals:   WHEN     — renewal in 45 days, last QBR 3 months ago
+      locations:   WHERE    — region: West, territory: US-Pacific
+      intents:     WHY      — churn risk HIGH, expansion potential LOW
+      processes:   HOW      — onboarding complete, support tier premium
+```
+
+Ships with 10 standard context types and 5 APQC-based business skills. Or define your own with a YAML template. Open source. Runs locally via Docker Compose. Deploys to AWS/GCP for teams to share context across agents and people.
+
+Every AI agent framework — CrewAI, LangGraph, AutoGen, Mastra, Claude, GPT — has the same unsolved problem: **where does the agent get good business context?**
 
 | Current approach | Problem |
 |-----------------|---------|
