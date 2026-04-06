@@ -4,55 +4,54 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Agent Context Platform — V1 Architecture</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
   /* From Kartha logo gradient: blue → teal → mint green */
-  --brand-blue: #00A8D6;
-  --brand-teal: #00BFA5;
-  --brand-mint: #00E07A;
-  --brand-grad: linear-gradient(135deg, #00A8D6, #00CCA8, #00E07A);
+  --brand-blue: #534AB7;
+  --brand-teal: #5DCAA5;
+  --brand-mint: #85B7EB;
+  --brand-grad: linear-gradient(135deg, #534AB7, #5DCAA5, #85B7EB);
 
   /* Pastels derived from brand */
-  --pastel-blue: #E6F7FC;
-  --pastel-teal: #E0F5F0;
-  --pastel-mint: #E2FAF0;
-  --pastel-cyan: #E0F7FA;
-  --pastel-green: #E6F9ED;
-  --pastel-slate: #EDF1F4;
+  --pastel-blue: #E6F1FB;
+  --pastel-teal: #E1F5EE;
+  --pastel-mint: #E1F5EE;
+  --pastel-cyan: #EEEDFE;
+  --pastel-green: #E1F5EE;
+  --pastel-slate: #f4f4f2;
 
   /* Complementary pastels */
-  --pastel-coral: #FFF0ED;
-  --pastel-lavender: #F0EDFA;
-  --pastel-peach: #FFF6ED;
+  --pastel-coral: #FAECE7;
+  --pastel-lavender: #EEEDFE;
+  --pastel-peach: #FAEEDA;
 
   /* Accent colors (stronger, for labels/borders) */
-  --accent-blue: #0091B8;
-  --accent-teal: #00A68B;
-  --accent-mint: #00C268;
-  --accent-cyan: #0097A7;
-  --accent-green: #1B9E4B;
+  --accent-blue: #185FA5;
+  --accent-teal: #0F6E56;
+  --accent-mint: #085041;
+  --accent-cyan: #534AB7;
+  --accent-green: #0F6E56;
   --accent-slate: #5A7285;
-  --accent-coral: #E8705A;
-  --accent-lavender: #7E6BBE;
+  --accent-coral: #F0997B;
+  --accent-lavender: #7F77DD;
 
   /* Text */
-  --text-primary: #163040;
-  --text-secondary: #3D6070;
-  --text-muted: #7A9AAD;
-  --text-dim: #A8C0CC;
+  --text-primary: #1a1a1a;
+  --text-secondary: #444444;
+  --text-muted: #666666;
+  --text-dim: #aaaaaa;
 
   /* Background */
-  --bg: #F6FAF9;
+  --bg: #FFFFFF;
   --card-bg: #FFFFFF;
-  --border-light: #D0E8E4;
+  --border-light: #AFA9EC;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
 
 body {
   background: var(--bg);
-  font-family: 'Cabinet Grotesk', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
   min-height: 100vh;
   color: var(--text-primary);
 }
@@ -88,7 +87,7 @@ body {
 }
 
 .header-left p {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 9.5px;
   color: var(--text-secondary);
   margin-top: 6px;
@@ -105,7 +104,7 @@ body {
 }
 
 .badge {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -148,26 +147,28 @@ body {
 }
 
 .section-subtitle {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 8px;
   font-weight: 400;
   color: var(--text-muted);
 }
 
 /* Color variants */
-.section.brand-blue  { border-color: #8ED5EC; }
-.section.brand-teal  { border-color: #8EDBC8; }
-.section.brand-mint  { border-color: #8EECC0; }
-.section.brand-cyan  { border-color: #80D8E0; }
-.section.brand-green { border-color: #80D4A0; }
-.section.brand-slate { border-color: #B4C8D4; }
+.section.brand-blue  { border-color: #85B7EB; }
+.section.brand-teal  { border-color: #5DCAA5; }
+.section.brand-mint  { border-color: #5DCAA5; }
+.section.brand-cyan  { border-color: #AFA9EC; }
+.section.brand-green { border-color: #5DCAA5; }
+.section.brand-slate { border-color: #b4b2a9; }
+.section.brand-coral { border-color: #F0997B; }
+.section.brand-amber { border-color: #FAC775; }
 .section.brand-grad  { border-image: var(--brand-grad) 1; }
 
 /* CHIPS */
 .chip-grid { display: flex; flex-wrap: wrap; gap: 5px; }
 
 .chip {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 9px;
   padding: 3px 8px;
   border-radius: 4px;
@@ -175,18 +176,20 @@ body {
   line-height: 1.3;
 }
 
-.chip-blue    { color: var(--accent-blue); border-color: #A8DCF0; background: var(--pastel-blue); }
-.chip-teal    { color: var(--accent-teal); border-color: #A0DCC8; background: var(--pastel-teal); }
-.chip-mint    { color: var(--accent-mint); border-color: #A0E8C0; background: var(--pastel-mint); }
-.chip-cyan    { color: var(--accent-cyan); border-color: #88D4E0; background: var(--pastel-cyan); }
-.chip-green   { color: var(--accent-green); border-color: #90D8A8; background: var(--pastel-green); }
-.chip-slate   { color: var(--accent-slate); border-color: #C0D0DC; background: var(--pastel-slate); }
+.chip-blue    { color: var(--accent-blue); border-color: #85B7EB; background: var(--pastel-blue); }
+.chip-teal    { color: var(--accent-teal); border-color: #5DCAA5; background: var(--pastel-teal); }
+.chip-mint    { color: var(--accent-mint); border-color: #5DCAA5; background: var(--pastel-mint); }
+.chip-cyan    { color: var(--accent-cyan); border-color: #AFA9EC; background: var(--pastel-cyan); }
+.chip-green   { color: var(--accent-green); border-color: #5DCAA5; background: var(--pastel-green); }
+.chip-slate   { color: var(--accent-slate); border-color: #b4b2a9; background: var(--pastel-slate); }
+.chip-coral   { color: #712B13; border-color: #F0997B; background: #FAECE7; }
+.chip-amber   { color: #633806; border-color: #FAC775; background: #FAEEDA; }
 
 /* MONO LIST */
 .mono-list { display: flex; flex-direction: column; gap: 4px; }
 
 .mono-item {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 9px;
   color: var(--text-secondary);
   display: flex;
@@ -227,7 +230,7 @@ body {
 .flow-arrow-head { font-size: 10px; line-height: 1; }
 
 .flow-arrow-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 8px;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -237,7 +240,7 @@ body {
 
 /* DIVIDER LABEL */
 .divider-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.15em;
@@ -279,7 +282,7 @@ body {
 }
 
 .engine-module-title {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 9px;
   font-weight: 700;
   color: var(--text-primary);
@@ -290,7 +293,7 @@ body {
 }
 
 .engine-module-item {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 8px;
   color: var(--text-muted);
   padding: 1px 0;
@@ -314,7 +317,7 @@ body {
 }
 
 .com-cell {
-  border: 1px solid #A0DCC8;
+  border: 1px solid #5DCAA5;
   border-radius: 6px;
   padding: 8px 4px;
   text-align: center;
@@ -323,7 +326,7 @@ body {
 
 .com-icon { font-size: 14px; }
 .com-key {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 8px;
   font-weight: 700;
   color: var(--accent-teal);
@@ -331,7 +334,7 @@ body {
   margin: 3px 0 1px;
 }
 .com-val {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 7px;
   color: var(--text-muted);
 }
@@ -345,14 +348,14 @@ body {
 }
 
 .db-table {
-  border: 1px solid #A0E8C0;
+  border: 1px solid #5DCAA5;
   border-radius: 6px;
   padding: 10px;
   background: var(--pastel-mint);
 }
 
 .db-table-name {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 9px;
   font-weight: 700;
   color: var(--accent-mint);
@@ -363,11 +366,11 @@ body {
 }
 
 .db-col {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 8px;
   color: var(--text-secondary);
   padding: 2px 0;
-  border-bottom: 1px solid #C0ECDA;
+  border-bottom: 1px solid #5DCAA5;
   display: flex;
   justify-content: space-between;
 }
@@ -383,7 +386,7 @@ body {
 }
 
 .project-file {
-  border: 1px solid #A8DCF0;
+  border: 1px solid #85B7EB;
   border-radius: 6px;
   padding: 10px;
   background: var(--pastel-blue);
@@ -393,14 +396,14 @@ body {
 .project-file-icon { font-size: 16px; margin-bottom: 4px; }
 
 .project-file-name {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 9px;
   font-weight: 700;
   color: var(--accent-blue);
 }
 
 .project-file-desc {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 7.5px;
   color: var(--text-muted);
   margin-top: 2px;
@@ -415,15 +418,15 @@ body {
 }
 
 .tmpl-cell {
-  border: 1px solid #88D4E0;
+  border: 1px solid #FAC775;
   border-radius: 6px;
   padding: 8px 4px;
   text-align: center;
-  background: var(--pastel-cyan);
+  background: #FAEEDA;
 }
 
 .tmpl-cat {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 6.5px;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -431,15 +434,15 @@ body {
 }
 
 .tmpl-name {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 9px;
   font-weight: 700;
-  color: var(--accent-cyan);
+  color: #633806;
   margin-top: 2px;
 }
 
 .tmpl-count {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 7px;
   color: var(--text-dim);
   margin-top: 2px;
@@ -457,7 +460,7 @@ body {
 
 .footer-item { text-align: center; }
 .footer-item-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 8px;
   font-weight: 600;
   color: var(--text-muted);
@@ -466,7 +469,7 @@ body {
   margin-bottom: 4px;
 }
 .footer-item-value {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
   font-size: 11px;
   font-weight: 700;
   color: var(--text-primary);
@@ -532,7 +535,7 @@ body {
           <div class="project-file-desc">Platform URL, auth<br>connector config</div>
         </div>
       </div>
-      <div style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text-muted);text-align:center;padding:6px;background:var(--pastel-blue);border-radius:4px;border:1px solid #A8DCF0">
+      <div style="margin-top:10px;font-family:'SF Mono', Menlo, Consolas, monospace;font-size:8px;color:var(--text-muted);text-align:center;padding:6px;background:var(--pastel-blue);border-radius:4px;border:1px solid #85B7EB">
         Their repo · version controlled · git-tracked · editable · one project per use case · feeds into the running platform
       </div>
     </div>
@@ -557,19 +560,19 @@ body {
     <div class="platform-grid">
 
       <!-- CLI -->
-      <div class="section brand-blue">
+      <div class="section brand-coral">
         <div class="section-title">
-          <div class="dot-marker" style="background:var(--accent-blue)"></div>
+          <div class="dot-marker" style="background:#F0997B"></div>
           CLI &nbsp;<span class="section-subtitle">@kartha/acp-cli</span>
         </div>
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text-muted);margin-bottom:8px">
+        <div style="font-family:'SF Mono', Menlo, Consolas, monospace;font-size:8px;color:var(--text-muted);margin-bottom:8px">
           Pure HTTP client — talks to REST API<br>No @acp/core · no direct DB access
         </div>
         <div class="mono-list">
-          <div class="mono-item"><div class="dot" style="background:var(--accent-blue)"></div><b>acp init</b> — create project</div>
-          <div class="mono-item"><div class="dot" style="background:var(--accent-blue)"></div><b>acp ctx define</b> — add type</div>
-          <div class="mono-item"><div class="dot" style="background:var(--accent-blue)"></div><b>acp connect add</b> — map data</div>
-          <div class="mono-item"><div class="dot" style="background:var(--accent-blue)"></div><b>acp connect sync</b> — load data</div>
+          <div class="mono-item"><div class="dot" style="background:#F0997B"></div><b>acp init</b> — create project</div>
+          <div class="mono-item"><div class="dot" style="background:#F0997B"></div><b>acp ctx define</b> — add type</div>
+          <div class="mono-item"><div class="dot" style="background:#F0997B"></div><b>acp connect add</b> — map data</div>
+          <div class="mono-item"><div class="dot" style="background:#F0997B"></div><b>acp connect sync</b> — load data</div>
           <div class="mono-item"><div class="dot" style="background:var(--brand-teal)"></div><b>acp ctx get</b> — entity profile</div>
           <div class="mono-item"><div class="dot" style="background:var(--brand-teal)"></div><b>acp ctx search</b> — find entities</div>
           <div class="mono-item"><div class="dot" style="background:var(--brand-teal)"></div><b>acp txn list</b> — transactions</div>
@@ -584,7 +587,7 @@ body {
           <div class="dot-marker" style="background:var(--accent-cyan)"></div>
           REST API :3002 &nbsp;<span class="section-subtitle">schema-agnostic</span>
         </div>
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text-muted);margin-bottom:8px">
+        <div style="font-family:'SF Mono', Menlo, Consolas, monospace;font-size:8px;color:var(--text-muted);margin-bottom:8px">
           Uses @acp/core · direct DB access<br>Accepts any JSONB — no template validation
         </div>
         <div class="chip-grid">
@@ -606,7 +609,7 @@ body {
           <div class="dot-marker" style="background:var(--accent-teal)"></div>
           MCP Server :3001 &nbsp;<span class="section-subtitle">HTTP + stdio</span>
         </div>
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text-muted);margin-bottom:8px">
+        <div style="font-family:'SF Mono', Menlo, Consolas, monospace;font-size:8px;color:var(--text-muted);margin-bottom:8px">
           Uses @acp/core · direct DB access<br>Streamable HTTP + stdio (Claude Desktop)
         </div>
         <div class="chip-grid">
@@ -618,9 +621,9 @@ body {
         </div>
         <div style="margin-top:8px">
           <div class="mono-list">
-            <div class="mono-item"><div class="dot" style="background:var(--accent-teal)"></div>Claude Desktop · Cursor</div>
-            <div class="mono-item"><div class="dot" style="background:var(--accent-teal)"></div>CrewAI · LangGraph</div>
-            <div class="mono-item"><div class="dot" style="background:var(--accent-teal)"></div>Any MCP client</div>
+            <div class="mono-item"><div class="dot" style="background:#F0997B"></div>Claude Desktop · ChatGPT</div>
+            <div class="mono-item"><div class="dot" style="background:#F0997B"></div>CrewAI · LangGraph · Goose</div>
+            <div class="mono-item"><div class="dot" style="background:#F0997B"></div>Any MCP client</div>
           </div>
         </div>
       </div>
@@ -738,9 +741,9 @@ body {
     <!-- TEMPLATES -->
     <div class="divider-label">Standard Templates · YAML · Bundled in CLI · Copied to Developer Project</div>
 
-    <div class="section brand-cyan">
+    <div class="section brand-amber">
       <div class="section-title">
-        <div class="dot-marker" style="background:var(--accent-cyan)"></div>
+        <div class="dot-marker" style="background:#BA7517"></div>
         10 Standard Context Types &nbsp;<span class="section-subtitle">developer picks with `acp init` · edits in their project · CLI validates before sync</span>
       </div>
       <div class="template-grid">
