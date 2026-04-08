@@ -13,59 +13,72 @@
 
 ## 🚀 Quick Start
 
+Get from zero to "Claude is reasoning over your business data" in under 10 minutes.
+
 ### Prerequisites
 
-- **Node.js** 20.x — [download](https://nodejs.org/) or `brew install node@20` (Mac) / `nvm install 20` (any OS)
-- **pnpm** — `npm install -g pnpm` (after installing Node)
-- **Docker** — [Docker Desktop](https://www.docker.com/products/docker-desktop/) for Mac/Windows, or `apt install docker.io` on Linux. Make sure Docker is running before proceeding.
+- **Node.js** 20.x — `brew install node@20` (Mac) · `nvm install 20` (any OS) · [download](https://nodejs.org/)
+- **pnpm** — `npm install -g pnpm`
+- **Docker** — [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Mac/Windows) or `apt install docker.io` (Linux). Make sure it's running.
+- **Claude Desktop** (optional, for step 3) — [download](https://claude.ai/download)
 
-### 1. Start the Platform
+> First time using `pnpm` global packages? Run `pnpm setup && source ~/.zshrc` once before step 1 so pnpm can create its global bin directory.
+
+### 1. Clone and Set Up
 
 ```bash
 git clone https://github.com/Kartha-AI/agent-context-platform
 cd agent-context-platform
-
-pnpm install
-pnpm run build
-
-docker compose up -d
-
-# Verify -- all 3 services (api, db and mcp) should be healthy ()
-docker compose ps
-curl http://localhost:3002/v1/health
+./setup.sh
 ```
 
-### 2. Install the CLI
+`setup.sh` installs dependencies, builds packages, starts the platform (Postgres + REST API + MCP server in Docker), and links the `acp` CLI globally. When it finishes, `acp` is available from any directory and the platform is running on:
+
+- Postgres → `localhost:5432`
+- REST API → `localhost:3002`
+- MCP server → `localhost:3001`
+
+### 2. Load the Demo (2 minutes)
+
+The demo ships with 20 customers, contacts, invoices, and vendors. Five of the customers have dramatic risk stories — biggest account in worst shape, departed champions, ghost accounts, stalled onboarding — so the agent has something interesting to reason about.
 
 ```bash
-pnpm setup                 # creates global bin dir (if needed)
-source ~/.zshrc            # reload shell
-cd packages/cli && pnpm link --global
-```
-
-`acp` is now available globally from any directory.
-
-### 3. Try the Demo (2 minutes)
-
-```bash
-# Create a demo project with sample data
 acp init --demo ~/projects/acp-demo
 cd ~/projects/acp-demo
-
-# Load demo data (20 customers, 40 contacts, 50 invoices, 10 vendors)
 acp connect sync
-
-# Query your data
-acp ctx list
-acp ctx get customer "Acme Corp"
-acp ctx search --type customer --filter '{"context.measures.health_score":{"lt":50}}'
-acp txn list --types risk_assessed
-acp changes --since 2026-03-01T00:00:00Z
 ```
 
-### 4. Connect Claude Desktop
+Try a few queries from the CLI:
 
-Add to your `claude_desktop_config.json`:
+```bash
+acp ctx list                                                    # entity counts by type
+acp ctx get customer "Pinnacle Industries"                      # full profile, all 7 dimensions
+acp ctx search --type customer \
+  --filter '{"context.measures.health_score":{"lt":50}}'        # at-risk customers
+acp ctx search --type invoice \
+  --filter '{"context.attributes.status":{"eq":"overdue"}}'     # overdue invoices
+acp changes --since 2026-03-01T00:00:00Z                        # changefeed
+```
+
+### 3. Connect Claude Desktop
+
+One command wires up Claude Desktop:
+
+```bash
+acp setup claude-desktop
+```
+
+This locates your `claude_desktop_config.json`, detects the ACP repo, adds the MCP server entry, and prints next steps. Restart Claude Desktop (`Cmd+Q` then reopen) and you're ready.
+
+Also supported:
+
+```bash
+acp setup cursor          # writes .cursor/mcp.json in the current directory
+acp setup claude-code     # writes .mcp.json in the current directory
+```
+
+<details>
+<summary>Manual Claude Desktop config (if you prefer)</summary>
 
 ```json
 {
@@ -83,14 +96,23 @@ Add to your `claude_desktop_config.json`:
 ```
 
 Replace `{path-to-acp}` with the absolute path to your cloned repo.
+</details>
 
-Now ask Claude:
+**For a structured analyst persona**, create a new Claude Desktop Project and paste [`skills/quickstart/claude-project.md`](skills/quickstart/claude-project.md) as the system prompt. The agent will know how to navigate the 7-dimension schema before its first message.
 
-> "Which customers have health scores below 50? What happened recently with each of them?"
+**Then ask Claude:**
 
-> "Show me all overdue invoices over $10,000 and which customers they belong to."
+> "I'm taking over customer success today. Brief me on our riskiest accounts — what's happening with each one and what should I do first?"
 
-### 5. Load Your Own Data
+> "Pinnacle Industries is our biggest account. What's their full picture?"
+
+> "Which customers have renewals in the next 90 days and are showing risk signals?"
+
+> "Show me at-risk customers that also have overdue invoices."
+
+The last one is the "wow" moment — Claude joins customer health with collections data in a single call, no manual cross-referencing.
+
+### 4. Load Your Own Data
 
 ```bash
 acp init ~/projects/my-ops       # pick context types interactively
@@ -100,6 +122,8 @@ acp connect add csv              # generates pipeline YAML with auto-mapping
 acp connect sync                 # validates + loads data
 acp ctx list                     # see what's loaded
 ```
+
+Pipelines are YAML — version-control them alongside your project. See [Pipeline YAML Format](#pipeline-yaml-format) below.
 
 ---
 
@@ -249,6 +273,7 @@ Skills are pre-built agent workflows that run on top of ACP data. They provide t
 
 | Skill | APQC Process | Context Types | What It Does |
 |-------|-------------|---------------|--------------|
+| **Quickstart Analyst** | — | any | General-purpose business analyst prompt — paste into a Claude Project to start exploring data |
 | **Customer Health Monitor** | 3.3.4 Manage Customer Health | customer, case | Polls changefeed, classifies risk (critical/high/medium/low), records `risk_assessed` |
 | **Pipeline Risk Assessment** | 3.2.5 Manage Sales Pipeline | opportunity, customer | Flags stale deals, missing context, overvalued pipeline, records `deal_risk_assessed` |
 | **Invoice Collections Tracker** | 8.3.4 Manage Collections | invoice, customer | Finds overdue invoices, groups by aging bracket, cross-references customer health |
@@ -287,6 +312,9 @@ skills/customer-health-monitor/
 | `acp connect add csv` | Configure a CSV/JSON data source + generate mapping |
 | `acp connect list` | Show configured connectors |
 | `acp connect sync` | Validate and load data into the platform |
+| `acp setup claude-desktop` | Auto-configure Claude Desktop to use the ACP MCP server |
+| `acp setup cursor` | Write `.cursor/mcp.json` for Cursor in current directory |
+| `acp setup claude-code` | Write `.mcp.json` for Claude Code in current directory |
 
 ### Query Commands
 

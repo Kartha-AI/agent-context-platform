@@ -146,32 +146,6 @@ importers:
         specifier: ^5.4.0
         version: 5.9.3
 
-  scripts:
-    dependencies:
-      '@acp/core':
-        specifier: workspace:*
-        version: link:../packages/core
-      '@acp/templates':
-        specifier: workspace:*
-        version: link:../templates
-    devDependencies:
-      tsx:
-        specifier: ^4.7.0
-        version: 4.21.0
-      typescript:
-        specifier: ^5.4.0
-        version: 5.9.3
-
-  templates:
-    dependencies:
-      '@acp/core':
-        specifier: workspace:*
-        version: link:../packages/core
-    devDependencies:
-      typescript:
-        specifier: ^5.4.0
-        version: 5.9.3
-
 packages:
 
   '@aws-cdk/asset-awscli-v1@2.2.263':
