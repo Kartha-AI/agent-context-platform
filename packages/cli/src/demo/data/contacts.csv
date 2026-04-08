@@ -1,41 +1,29 @@
 id,name,email,phone,title,company,role,status,engagement_score,meetings_last_90d,account_owner,first_contact,last_contacted,city,country,timezone,sentiment
-CT001,John Smith,john@acme.com,555-0101,VP Engineering,Acme Corp,champion,active,85,4,Sarah Chen,2023-01-20,2026-03-25,San Francisco,US,PST,positive
-CT002,Jane Doe,jane@acme.com,555-0102,CTO,Acme Corp,decision_maker,active,90,6,Sarah Chen,2023-01-15,2026-03-28,San Francisco,US,PST,positive
-CT003,Amy Lee,amy@globex.io,555-0201,Head of Product,Globex Industries,champion,active,60,2,David Park,2024-03-05,2026-03-20,Austin,US,CST,neutral
-CT004,Bob Chen,bob@globex.io,555-0202,CEO,Globex Industries,decision_maker,active,45,1,David Park,2024-04-10,2026-02-15,Austin,US,CST,neutral
-CT005,Nina Patel,nina@northwind.com,555-0301,COO,Northwind Trading,decision_maker,active,35,1,Sarah Chen,2022-06-15,2026-03-10,New York,US,EST,negative
-CT006,Raj Kumar,raj@northwind.com,555-0302,Director IT,Northwind Trading,influencer,active,50,2,Sarah Chen,2022-07-01,2026-03-15,New York,US,EST,neutral
-CT007,Tom Brown,tom@contoso.com,555-0401,CFO,Contoso Ltd,decision_maker,active,92,5,Maria Garcia,2021-11-05,2026-03-27,Chicago,US,CST,positive
-CT008,Lisa Wang,lisa@contoso.com,555-0402,VP Product,Contoso Ltd,champion,active,88,4,Maria Garcia,2022-01-10,2026-03-26,Chicago,US,CST,positive
-CT009,Rachel Green,rachel@fabrikam.com,555-0501,Director Ops,Fabrikam Inc,champion,active,70,3,David Park,2024-07-20,2026-03-22,Boston,US,EST,positive
-CT010,Peter Gibbons,peter@initech.co,555-0601,CTO,Initech Corp,decision_maker,active,40,1,Chris Lee,2025-01-15,2026-03-18,Austin,US,CST,neutral
-CT011,Ada Wong,ada@umbrella.bio,555-0701,VP Research,Umbrella Corp,champion,active,82,3,Maria Garcia,2020-04-10,2026-03-20,Zurich,CH,CET,positive
-CT012,Happy Hogan,happy@stark.com,555-0801,Head of Security,Stark Industries,influencer,active,75,2,Sarah Chen,2019-08-20,2026-03-25,Los Angeles,US,PST,positive
-CT013,Pepper Potts,pepper@stark.com,555-0802,CEO,Stark Industries,decision_maker,active,95,6,Sarah Chen,2019-08-15,2026-03-28,Los Angeles,US,PST,positive
-CT014,Alfred Penn,alfred@wayne.com,555-0901,COO,Wayne Enterprises,champion,active,80,3,Maria Garcia,2021-03-05,2026-03-20,Gotham,US,EST,positive
-CT015,Lucius Fox,lucius@wayne.com,555-0902,CTO,Wayne Enterprises,decision_maker,active,85,4,Maria Garcia,2021-03-01,2026-03-22,Gotham,US,EST,positive
-CT016,Harry Osborn,harry@oscorp.com,555-1001,VP Sales,Oscorp,champion,active,30,1,Chris Lee,2024-09-05,2026-02-28,New York,US,EST,negative
-CT017,Norman Osborn,norman@oscorp.com,555-1002,CEO,Oscorp,decision_maker,active,25,0,Chris Lee,2024-09-01,2026-01-15,New York,US,EST,negative
-CT018,Sarah Connor,sarah@cyberdyne.ai,555-1201,Head of Product,Cyberdyne Systems,champion,active,78,3,Sarah Chen,2024-01-25,2026-03-22,Palo Alto,US,PST,positive
-CT019,David Bishop,david@weyland.com,555-1301,CTO,Weyland Corp,champion,active,80,3,Maria Garcia,2020-10-05,2026-03-22,London,UK,GMT,positive
-CT020,Peter Weyland,peter@weyland.com,555-1302,CEO,Weyland Corp,decision_maker,active,70,2,Maria Garcia,2020-10-01,2026-03-20,London,UK,GMT,neutral
-CT021,Rachael Rosen,rachael@tyrell.com,555-1401,VP Eng,Tyrell Corp,champion,active,55,2,Chris Lee,2023-05-20,2026-03-15,San Jose,US,PST,neutral
-CT022,Cave Johnson,cave@aperture.sci,555-1601,CEO,Aperture Science,decision_maker,active,40,1,Sarah Chen,2023-08-05,2026-02-20,Cleveland,US,EST,negative
-CT023,Doug Rattmann,doug@aperture.sci,555-1602,Lead Scientist,Aperture Science,influencer,active,55,2,Sarah Chen,2023-09-01,2026-03-10,Cleveland,US,EST,neutral
-CT024,Nina Sharp,nina@massivedynamic.com,555-1701,COO,Massive Dynamic,decision_maker,active,88,4,Maria Garcia,2021-06-05,2026-03-25,New York,US,EST,positive
-CT025,Gavin Belson,gavin@hooli.com,555-1801,CEO,Hooli,decision_maker,active,60,2,David Park,2023-11-05,2026-03-10,San Francisco,US,PST,neutral
-CT026,Richard Hendricks,richard@piedpiper.com,555-1901,CEO,Pied Piper,decision_maker,active,85,3,Chris Lee,2025-06-05,2026-03-28,Palo Alto,US,PST,positive
-CT027,Jim Halpert,jim@dundermifflin.com,555-2001,Sales Manager,Dunder Mifflin,champion,active,72,2,David Park,2024-04-05,2026-03-20,Scranton,US,EST,positive
-CT028,Michael Scott,michael@dundermifflin.com,555-2002,Regional Manager,Dunder Mifflin,decision_maker,active,65,2,David Park,2024-04-01,2026-03-15,Scranton,US,EST,positive
-CT029,Dwight Schrute,dwight@dundermifflin.com,555-2003,Asst Regional Manager,Dunder Mifflin,influencer,active,80,3,David Park,2024-04-10,2026-03-22,Scranton,US,EST,positive
-CT030,Miles Dyson,miles@cyberdyne.ai,555-1203,CTO,Cyberdyne Systems,decision_maker,active,72,2,Sarah Chen,2024-01-20,2026-03-18,Palo Alto,US,PST,positive
-CT031,Sol Roth,sol@soylent.co,555-1501,COO,Soylent Corp,decision_maker,active,60,1,David Park,2025-02-05,2026-03-15,Portland,US,PST,neutral
-CT032,Brandon Fayette,brandon@massivedynamic.com,555-1703,VP Engineering,Massive Dynamic,champion,active,82,3,Maria Garcia,2021-07-01,2026-03-22,New York,US,EST,positive
-CT033,Big Head,bighead@hooli.com,555-1803,VP Innovation,Hooli,influencer,active,50,1,David Park,2023-12-01,2026-03-05,San Francisco,US,PST,positive
-CT034,Dinesh Chugtai,dinesh@piedpiper.com,555-1903,CTO,Pied Piper,champion,active,80,3,Chris Lee,2025-06-10,2026-03-25,Palo Alto,US,PST,positive
-CT035,Eldon Tyrell,eldon@tyrell.com,555-1403,CEO,Tyrell Corp,decision_maker,active,45,1,Chris Lee,2023-05-15,2026-02-10,San Jose,US,PST,neutral
-CT036,Robert Kim,robert@northwind.com,555-0303,CEO,Northwind Trading,decision_maker,active,30,1,Sarah Chen,2022-06-10,2026-03-05,New York,US,EST,negative
-CT037,James Wilson,james@contoso.com,555-0403,CEO,Contoso Ltd,decision_maker,active,90,4,Maria Garcia,2021-11-01,2026-03-25,Chicago,US,CST,positive
-CT038,Susan Taylor,susan@fabrikam.com,555-0503,CEO,Fabrikam Inc,decision_maker,active,65,2,David Park,2024-07-15,2026-03-18,Boston,US,EST,neutral
-CT039,Albert Wesker,albert@umbrella.bio,555-0703,CEO,Umbrella Corp,decision_maker,active,75,2,Maria Garcia,2020-04-01,2026-03-15,Zurich,CH,CET,neutral
-CT040,Mercy Graves,mercy@lexcorp.com,555-1101,COO,LexCorp,champion,churned,10,0,David Park,2022-01-20,2025-05-15,Metropolis,US,EST,negative
+CT001,Helen Park,helen@pinnacle.com,555-0101,VP Operations,Pinnacle Industries,decision_maker,active,22,1,Sarah Chen,2021-03-05,2026-03-15,Detroit,US,EST,negative
+CT002,Marcus Reid,marcus@pinnacle.com,555-0102,CFO,Pinnacle Industries,decision_maker,active,30,1,Sarah Chen,2021-03-10,2026-03-01,Detroit,US,EST,negative
+CT003,John Smith,john@meridian.tech,555-0201,VP Engineering,Meridian Technologies,champion,active,35,1,Sarah Chen,2023-01-20,2026-02-15,San Francisco,US,PST,negative
+CT004,Jane Doe,jane@meridian.tech,555-0202,CTO,Meridian Technologies,decision_maker,active,40,1,Sarah Chen,2023-01-15,2026-02-28,San Francisco,US,PST,neutral
+CT005,Alex Rivera,alex@novatech.io,555-0301,Head of Product,NovaTech Solutions,champion,departed,0,0,David Park,2023-08-05,2026-03-24,Austin,US,CST,negative
+CT006,Brad Foster,brad@novatech.io,555-0302,CEO,NovaTech Solutions,decision_maker,active,38,1,David Park,2023-08-01,2026-03-10,Austin,US,CST,neutral
+CT007,David Park,david@globalsync.com,555-0401,Director of Logistics,GlobalSync Partners,decision_maker,departed,0,0,Maria Garcia,2022-11-05,2026-03-07,Chicago,US,CST,neutral
+CT008,Marie Chen,marie@cobalt.health,555-0501,Director Operations,Cobalt Systems,decision_maker,active,48,2,Chris Lee,2025-08-05,2026-03-18,Boston,US,EST,neutral
+CT009,Tom Brown,tom@contoso.com,555-0601,CFO,Contoso Ltd,decision_maker,active,92,5,Maria Garcia,2021-11-05,2026-03-27,Chicago,US,CST,positive
+CT010,Lisa Wang,lisa@contoso.com,555-0602,VP Product,Contoso Ltd,champion,active,88,4,Maria Garcia,2022-01-10,2026-03-26,Chicago,US,CST,positive
+CT011,Happy Hogan,happy@stark.com,555-0701,Head of Security,Stark Industries,influencer,active,75,2,Sarah Chen,2019-08-20,2026-03-25,Los Angeles,US,PST,positive
+CT012,Pepper Potts,pepper@stark.com,555-0702,CEO,Stark Industries,decision_maker,active,95,6,Sarah Chen,2019-08-15,2026-03-28,Los Angeles,US,PST,positive
+CT013,Alfred Penn,alfred@wayne.com,555-0801,COO,Wayne Enterprises,champion,active,80,3,Maria Garcia,2021-03-05,2026-03-20,Gotham,US,EST,positive
+CT014,Lucius Fox,lucius@wayne.com,555-0802,CTO,Wayne Enterprises,decision_maker,active,85,4,Maria Garcia,2021-03-01,2026-03-22,Gotham,US,EST,positive
+CT015,Ada Wong,ada@umbrella.bio,555-0901,VP Research,Umbrella Corp,champion,active,82,3,Maria Garcia,2020-04-10,2026-03-20,Zurich,CH,CET,positive
+CT016,Brandon Fayette,brandon@massivedynamic.com,555-1001,VP Engineering,Massive Dynamic,champion,active,82,3,Maria Garcia,2021-07-01,2026-03-22,New York,US,EST,positive
+CT017,Nina Sharp,nina@massivedynamic.com,555-1002,COO,Massive Dynamic,decision_maker,active,88,4,Maria Garcia,2021-06-05,2026-03-25,New York,US,EST,positive
+CT018,David Bishop,david@weyland.com,555-1101,CTO,Weyland Corp,champion,active,80,3,Maria Garcia,2020-10-05,2026-03-22,London,UK,GMT,positive
+CT019,Peter Weyland,peter@weyland.com,555-1102,CEO,Weyland Corp,decision_maker,active,70,2,Maria Garcia,2020-10-01,2026-03-20,London,UK,GMT,neutral
+CT020,Jane Doe,jane2@acme.com,555-1201,CTO,Acme Corp,decision_maker,active,90,6,Sarah Chen,2023-01-15,2026-03-28,San Francisco,US,PST,positive
+CT021,Sarah Connor,sarah@cyberdyne.ai,555-1301,Head of Product,Cyberdyne Systems,champion,active,78,3,Sarah Chen,2024-01-25,2026-03-22,Palo Alto,US,PST,positive
+CT022,Big Head,bighead@hooli.com,555-1401,VP Innovation,Hooli,influencer,active,75,3,David Park,2023-12-01,2026-03-25,San Francisco,US,PST,positive
+CT023,Rachel Green,rachel@fabrikam.com,555-1501,Director Ops,Fabrikam Inc,champion,active,72,3,David Park,2024-07-20,2026-03-22,Boston,US,EST,positive
+CT024,Amy Lee,amy@globex.io,555-1601,Head of Product,Globex Industries,champion,active,65,3,David Park,2024-03-05,2026-03-20,Austin,US,CST,positive
+CT025,Rachael Rosen,rachael@tyrell.com,555-1701,VP Eng,Tyrell Corp,champion,active,70,2,Chris Lee,2023-05-20,2026-03-15,San Jose,US,PST,positive
+CT026,Jim Halpert,jim@dundermifflin.com,555-1801,Sales Manager,Dunder Mifflin,champion,active,76,3,David Park,2024-04-05,2026-03-20,Scranton,US,EST,positive
+CT027,Dinesh Chugtai,dinesh@piedpiper.com,555-1901,CTO,Pied Piper,champion,active,82,3,Chris Lee,2025-06-10,2026-03-25,Palo Alto,US,PST,positive
+CT028,Sol Roth,sol@soylent.co,555-2001,COO,Soylent Corp,decision_maker,active,73,2,David Park,2025-02-05,2026-03-15,Portland,US,PST,positive

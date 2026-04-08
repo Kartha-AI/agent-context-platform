@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
+import { showSplash } from './splash.js';
+import { registerSetupCommand } from './commands/setup.js';
 import { initCommand } from './commands/init.js';
 import { ctxDefineCommand } from './commands/ctx-define.js';
 import { ctxListCommand } from './commands/ctx-list.js';
@@ -12,6 +14,11 @@ import { connectAddCommand } from './commands/connect-add.js';
 import { connectListCommand } from './commands/connect-list.js';
 import { connectSyncCommand } from './commands/connect-sync.js';
 
+if (process.argv.length <= 2) {
+  showSplash();
+  process.exit(0);
+}
+
 const program = new Command();
 
 program
@@ -20,6 +27,7 @@ program
   .version('0.1.0');
 
 program.addCommand(initCommand);
+registerSetupCommand(program);
 
 const ctx = new Command('ctx').description('Context object commands');
 ctx.addCommand(ctxDefineCommand);
