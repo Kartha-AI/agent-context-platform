@@ -1,12 +1,12 @@
 # Agent Context Platform (ACP)
 
-### Open source context warehouse — any data, any agent, served via MCP/CLI.
-*Think Snowflake — replace data with context, proprietary with open source, SQL with MCP/CLI. Runs anywhere, works with any agent, enterprise scale.*
+### AI-enable your business — with the data and systems you already have.
+*No new apps. No starting from scratch. Pre-built context, ready for any AI agent in minutes.*
 
-🚀 **[Get started in 10 minutes](#-quick-start)** · 🏗️ [Architecture](#️-architecture) · 🧠 [Pre-Built Skills](#-pre-built-skills) · 💻 [CLI Reference](#-cli-reference) · ❓ [FAQ](FAQ.md)
+🚀 **[Get started in 10 minutes](#-quick-start)** · 🏗️ [Architecture](#️-architecture) · 🧠 [Pre-Built Skills](#-pre-built-skills) · 💻 [CLI Reference](#-cli-reference) · ❓ [FAQ](reference/FAQ.md)
 
 <p align="center">
-  <img src="acp-intro.png" alt="ACP Overview" width="100%"/>
+  <img src="reference/acp-intro.png" alt="ACP Overview" width="100%"/>
 </p>
 
 ---
@@ -149,7 +149,11 @@ Pipelines are YAML — version-control them alongside your project. See [Pipelin
 
 **The agent is the easy part. Context is the hard part.**
 
-Your AI agent is only as useful as what it knows about your business. Kartha ACP is the context layer that makes agents useful:
+Today, building a useful AI agent means wiring up connectors to every system — CRM, billing, support, ERP — then writing code to pull, normalize, and stitch data together so the agent has enough context to give a useful answer. It's cumbersome, fragile, and different for every agent you build. ACP eliminates that work. Your business data is loaded once, organized into structured context profiles, and served to any agent — pre-built, pre-joined, ready to reason on.
+
+The difference: ACP doesn't push the integration problem onto the agent — it solves it once, ahead of time. Pipelines pull and normalize your data before any agent asks a question. The result is pre-built, structured context stored in Postgres — reusable by any agent, any framework, any number of times. The 10th agent doesn't re-integrate. The 100th question doesn't re-pull. Build context once, use it everywhere. ACP provides the infrastructure around that context — MCP server, REST API, CLI, changefeed, transaction history — so any agent can connect and start reasoning immediately.
+
+Kartha ACP is the context layer that makes agents useful:
 
 - **Extract** from any system — CRM, billing, support, ERP, spreadsheets, databases, enterprise APIs
 - **Curate** into structured 7-dimension context profiles (what, how much, who, when, where, why, how)
@@ -157,7 +161,7 @@ Your AI agent is only as useful as what it knows about your business. Kartha ACP
 - **Extend** with your own context types — customers, invoices, fleet vehicles, clinical trials, anything
 - **Automate** with pre-built skills that monitor, assess, and act — continuously, not just when you ask
 
-*Uploading a spreadsheet to Claude works for one-off questions — ACP is for when you need persistent, cross-system context that multiple agents, people, and teams across your business share continuously. ([More in FAQ](FAQ.md#cant-i-just-upload-a-spreadsheet-to-claude-or-chatgpt-and-ask-questions))*
+*Uploading a spreadsheet to Claude works for one-off questions — ACP is for when you need persistent, cross-system context that multiple agents, people, and teams across your business share continuously. ([More in FAQ](reference/FAQ.md#cant-i-just-upload-a-spreadsheet-to-claude-or-chatgpt-and-ask-questions))*
 
 ```
 Your data (CRM, billing, support, ERP, spreadsheets, any system)
@@ -353,9 +357,9 @@ Type coercion is automatic: `measures` fields become numbers, `temporals` become
 
 ## 🏗️ Architecture
 
-![ACP Overview](acp-overview.png)
+![ACP Overview](reference/acp-overview.png)
 
-[View interactive architecture diagram](https://htmlpreview.github.io/?https://github.com/Kartha-AI/agent-context-platform/blob/main/acp-architecture.html)
+[View interactive architecture diagram](https://htmlpreview.github.io/?https://github.com/Kartha-AI/agent-context-platform/blob/main/reference/acp-architecture.html)
 
 ### Design Principles
 
@@ -580,7 +584,7 @@ pnpm run test
 
 ### Local Testing
 
-Import [`acp-postman-collection.json`](acp-postman-collection.json) into Postman for a ready-to-use collection covering all REST API and MCP endpoints. Run "Upsert Object" first (auto-saves the object ID), then "Initialize Session" for MCP requests.
+Import [`acp-postman-collection.json`](reference/acp-postman-collection.json) into Postman for a ready-to-use collection covering all REST API and MCP endpoints. Run "Upsert Object" first (auto-saves the object ID), then "Initialize Session" for MCP requests.
 
 #### curl examples
 
