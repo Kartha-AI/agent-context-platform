@@ -3,7 +3,7 @@
 ### AI-enable your business — with the data and systems you already have.
 *No new apps. No starting from scratch. Pre-built context, ready for any AI agent in minutes.*
 
-🚀 **[Get started in 10 minutes](#-quick-start)** · 🏗️ [Architecture](#️-architecture) · 🧠 [Pre-Built Skills](#-pre-built-skills) · 💻 [CLI Reference](#-cli-reference) · ❓ [FAQ](reference/FAQ.md)
+🚀 **[Get started in 10 minutes](#-quick-start)** · 🏗️ [Architecture](#️-architecture) · 🧠 [Pre-Built Skills](#-pre-built-skills) · 💻 [CLI Reference](#-cli-reference) · 🔄 [Loading Data at Scale](#-loading-data-at-scale) · ❓ [FAQ](reference/FAQ.md)
 
 <p align="center">
   <img src="reference/acp-intro.png" alt="ACP Overview" width="100%"/>
@@ -125,6 +125,8 @@ acp ctx list                     # see what's loaded
 
 Pipelines are YAML — version-control them alongside your project. See [Pipeline YAML Format](#pipeline-yaml-format) below.
 
+> **Enterprise data at scale?** For loading 100M+ rows from Snowflake, BigQuery, or your data warehouse — with partitioned extract, parallel workers, staging tables, and set-based promote — see the dedicated [acp-pipeline-reference](https://github.com/Kartha-AI/acp-pipeline-reference) repo. It's a production-grade pipeline pattern you fork and adapt to your sources. More in [Loading Data at Scale](#-loading-data-at-scale) below.
+
 ---
 
 ## 📑 Table of Contents
@@ -137,6 +139,7 @@ Pipelines are YAML — version-control them alongside your project. See [Pipelin
 - [📐 Context Object Model](#-context-object-model)
 - [🔌 MCP Tools](#-mcp-tools)
 - [🌐 REST API](#-rest-api)
+- [🚀 Loading Data at Scale](#-loading-data-at-scale)
 - [☁️ Deployment](#️-deployment)
 - [🛠️ Local Development](#️-local-development)
 - [📁 Project Structure](#-project-structure)
@@ -177,7 +180,7 @@ Your data (CRM, billing, support, ERP, spreadsheets, any system)
       processes:   HOW      — onboarding complete, support tier premium
 ```
 
-Ships with 10 standard context types and 5 APQC-based business skills. Or define your own with a YAML template. Open source. Runs locally via Docker Compose. Deploys to AWS/GCP for teams to share context across agents and people.
+Ships with 10 standard context types and 5 APQC-based business skills. Or define your own with a YAML template. Open source. Runs locally via Docker Compose. Deploys to AWS/GCP for teams to share context across agents and people. For loading enterprise data at scale, see [acp-pipeline-reference](https://github.com/Kartha-AI/acp-pipeline-reference) — a production-grade reference pipeline for warehouse-scale ingestion.
 
 Every AI agent framework — CrewAI, LangGraph, AutoGen, Mastra, Claude, GPT — has the same unsolved problem: **where does the agent get good business context?**
 
@@ -505,6 +508,50 @@ Filter operators: `eq`, `gt`, `gte`, `lt`, `lte`, `contains`
 Authentication: `Authorization: Bearer <api-key>`. All endpoints except `/v1/health`.
 
 **Upsert behavior:** Schema-agnostic. Deep merges new context into existing. Arrays replaced, not appended. `null` deletes fields. Computes diff, writes to change_log.
+
+---
+
+## 🚀 Loading Data at Scale
+
+For most use cases — CSVs, JSON files, modest API pulls — the built-in CLI connectors and `acp connect sync` handle ingestion well. Pipelines are YAML, validation happens locally, data goes through `/v1/objects/bulk`.
+
+For **enterprise-scale loads** (hundreds of millions of rows from data warehouses), `/bulk` alone isn't the right tool. You need:
+
+- **Partitioned extraction** so the load runs in parallel
+- **Streaming** so a single worker doesn't OOM on a 50M-row partition
+- **Staging tables** so failures don't force a full re-extract from the warehouse
+- **Set-based promote** so the final commit is one fast SQL transaction, not 50M HTTP calls
+- **Two-mode design** — bulk SQL promote for initial backfills, `/bulk` drainer for ongoing incremental sync
+
+These are pipeline concerns, not platform concerns. ACP exposes the contracts (`/bulk`, the context_objects schema, the 7-dimension shape) and lets you build the pipeline that fits your stack.
+
+### The reference pipeline
+
+We've shipped a production-grade reference pipeline as a separate repo:
+
+**🔗 [github.com/Kartha-AI/acp-pipeline-reference](https://github.com/Kartha-AI/acp-pipeline-reference)**
+
+It's a TypeScript monorepo with:
+
+- A **source-agnostic pipeline framework** — pluggable `SourceConnector` interface, shared staging + promote + drain
+- A working **Postgres connector** with TPC-H sample data so you can run end-to-end locally
+- A **Snowflake connector skeleton** showing how to add new sources (1-2 weeks of work for a senior engineer)
+- **Two-mode design:** SQL promote for 100M+ row backfills (~50k rows/sec), `/bulk` drainer for incremental sync
+- **AWS-native infrastructure:** ECS Fargate extractors, Step Functions orchestration, AWS CDK
+- **Operational runbooks:** deployment, initial load, incremental sync, adding connectors, troubleshooting
+
+Customers fork the repo, swap in their connector and transformer for their domain, and have a working enterprise pipeline against their stack. ACP Core is unchanged — the pipeline is purely a consumer of the documented contracts.
+
+### When to use which
+
+| Scenario | Approach |
+|---|---|
+| CSVs, JSON files, simple API pulls | Built-in CLI connectors (`acp connect add csv`) |
+| Modest production pipelines (< 1M rows) | Custom code calling `POST /v1/objects/bulk` directly |
+| Enterprise warehouse loads (100M+ rows) | Fork [acp-pipeline-reference](https://github.com/Kartha-AI/acp-pipeline-reference), adapt connectors |
+| Real-time event streams | Build your own: Kafka consumer → /bulk in batches |
+
+The platform contract is the same in all cases. Only the pipeline shape changes.
 
 ---
 
